@@ -40,7 +40,7 @@ const estado = readFileSync('ESTADO.md', 'utf8')
 // Aqui a gente pendura o prazo em cima do trecho que identifica a sonda, pra
 // planilha não ter uma coluna "quando" vazia justo nas linhas que faltam.
 const PRAZOS = [
-  [/AEO usa medição real/i, 'S2 · 16 a 23/08'],
+  [/AEO usa medição real/i, 'R1 · 30/09 a 10/10'],
   [/API do Google/i, 'esperando o Google liberar'],
   [/^Loja/i, 'depois do lançamento'],
 ]
@@ -75,31 +75,33 @@ if (sondas.length < 10) {
 // ── 2. Fila: a parte planejada ───────────────────────────────
 // Espelha a lista de trabalho. Não é verificável por definição: é combinado.
 const SPRINTS = {
-  S1: 'S1 · até 15/08',
-  S2: 'S2 · 16 a 23/08',
-  S3: 'S3 · 24 a 31/08',
+  // Rota refeita em 29/09, depois de 47 dias parados (quadro de desenvolvimento).
+  R1: 'R1 · 30/09 a 10/10',
+  R2: 'R2 · 13/10 a 24/10',
+  R3: 'R3 · 27/10 a 07/11',
   agora: 'agora',
   pos: 'depois do lançamento',
 }
 
 const FILA = [
   // Portões humanos primeiro: é o que trava tudo o mais.
-  { pilar: 'Google Perfil', oQue: 'Você criar a senha do robô semanal no Vercel (CRON_SECRET)', situacao: 'ESPERANDO VOCÊ', quando: SPRINTS.agora },
-  { pilar: 'Google Perfil', oQue: 'Você confirmar se a chave de e-mail (RESEND) já está no Vercel', situacao: 'ESPERANDO VOCÊ', quando: SPRINTS.agora },
+  // O commit c1fa034 (13/08) diz que as duas entraram na Vercel. Não dá pra
+  // conferir daqui (a API nega listar variáveis), então segue como pergunta.
+  { pilar: 'Google Perfil', oQue: 'Você confirmar que CRON_SECRET e RESEND_API_KEY estão na Vercel (o commit de 13/08 diz que sim)', situacao: 'ESPERANDO VOCÊ', quando: SPRINTS.agora },
+  { pilar: 'Google Perfil', oQue: 'Você aprovar o texto do e-mail semanal do Perfil (portão G1)', situacao: 'ESPERANDO VOCÊ', quando: SPRINTS.agora },
   { pilar: 'Google Perfil', oQue: 'Sessão de teste T5: publicar um post no seu Perfil de verdade, 20 min', situacao: 'ESPERANDO VOCÊ', quando: SPRINTS.agora },
 
-  { pilar: 'Métricas', oQue: 'Contar visitas de robô de IA no site do cliente (medição real, custo zero)', situacao: 'FALTA', quando: SPRINTS.S2 },
-  { pilar: 'Métricas', oQue: 'Posição real das palavras-chave, puxada do Search Console', situacao: 'FALTA', quando: SPRINTS.S2 },
+  { pilar: 'Métricas', oQue: 'Posição real das palavras-chave, puxada do Search Console', situacao: 'FALTA', quando: SPRINTS.R3 },
 
-  { pilar: 'Site builder', oQue: 'Tela de domínio próprio no painel (hoje o cliente não tem onde apontar o DNS)', situacao: 'FALTA', quando: SPRINTS.S2 },
-  { pilar: 'Site builder', oQue: 'Bloco de resposta direta abaixo do título: o trecho que a IA copia ao citar', situacao: 'FALTA', quando: SPRINTS.S2 },
-  { pilar: 'Site builder', oQue: 'Content-Signal: separar "pode me citar" de "pode me usar pra treinar"', situacao: 'FALTA', quando: SPRINTS.S3 },
-  { pilar: 'Site builder', oQue: 'Site lento não publica (trava acima de 2,5 segundos)', situacao: 'FALTA', quando: SPRINTS.S3 },
-  { pilar: 'Site builder', oQue: 'Avisar quando uma página fica a mais de 3 cliques da home', situacao: 'FALTA', quando: SPRINTS.S3 },
+  { pilar: 'Site builder', oQue: 'Tela de domínio próprio no painel (hoje o cliente não tem onde apontar o DNS)', situacao: 'FALTA', quando: SPRINTS.R2 },
+  { pilar: 'Site builder', oQue: 'Bloco de resposta direta abaixo do título: o trecho que a IA copia ao citar', situacao: 'FALTA', quando: SPRINTS.R2 },
+  { pilar: 'Site builder', oQue: 'Content-Signal: separar "pode me citar" de "pode me usar pra treinar"', situacao: 'FALTA', quando: SPRINTS.R3 },
+  { pilar: 'Site builder', oQue: 'Site lento não publica (trava acima de 2,5 segundos)', situacao: 'FALTA', quando: SPRINTS.R3 },
+  { pilar: 'Site builder', oQue: 'Avisar quando uma página fica a mais de 3 cliques da home', situacao: 'FALTA', quando: SPRINTS.R3 },
 
-  { pilar: 'Onboarding', oQue: 'Descobrir por que 8 sites são gerados e só 1 é publicado', situacao: 'FALTA', quando: SPRINTS.S3 },
-  { pilar: 'Onboarding', oQue: 'Opção Enterprise: sai do fluxo normal e cai no e-mail institucional', situacao: 'FALTA', quando: SPRINTS.S2 },
-  { pilar: 'Blog builder', oQue: 'Publicar 5 posts de verdade e conferir os links entre eles', situacao: 'FALTA', quando: SPRINTS.S3 },
+  { pilar: 'Onboarding', oQue: 'Descobrir por que 9 sites são gerados e só 2 são publicados', situacao: 'FALTA', quando: SPRINTS.R2 },
+  { pilar: 'Onboarding', oQue: 'Opção Enterprise: sai do fluxo normal e cai no e-mail institucional', situacao: 'FALTA', quando: SPRINTS.R2 },
+  { pilar: 'Blog builder', oQue: 'Publicar 5 posts de verdade e conferir os links entre eles', situacao: 'FALTA', quando: SPRINTS.R3 },
 
   { pilar: 'Fora do MVP', oQue: 'Cobrança da assinatura (o beta é grátis, então não corre)', situacao: 'FORA DO MVP', quando: SPRINTS.pos },
 ].map(l => ({ ...l, fonte: 'plano' }))
