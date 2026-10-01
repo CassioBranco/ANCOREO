@@ -94,6 +94,13 @@ const SONDAS = [
     ok: () => grepCount('isSample', 'lib/aeo') === 0,
   },
   {
+    pilar: 'Métricas',
+    nome: 'Visitas de robô de IA são contadas no site do cliente',
+    // Cobra o chamador no middleware, não só o módulo: módulo sem chamador
+    // é exatamente o "escrito e não ligado" que esta sonda existe pra pegar.
+    ok: () => grepCount('recordAiBotVisit', 'middleware.ts') > 0 && grepCount('getAiBotVisits', 'app/(dashboard)') > 0,
+  },
+  {
     pilar: 'GBP',
     nome: 'Existe integração com a API do Google (OAuth + publicação)',
     // NÃO usar 'googleapis' solto: casa com fonts.googleapis.com dos templates

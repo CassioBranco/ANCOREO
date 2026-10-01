@@ -1,10 +1,12 @@
-import { type NextRequest, NextResponse } from 'next/server'
+import { type NextFetchEvent, type NextRequest, NextResponse } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
 // isAppHost é compartilhado com /api/track (mesma regra de "painel x site de
 // cliente" nos dois lugares — se divergir, a telemetria atribui visita errada).
 import { isAppHost } from '@/lib/site-host'
+import { detectAiBot } from '@/lib/seo/ai-bots'
+import { recordAiBotVisit } from '@/lib/analytics/bot-visit'
 
-export async function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest, event: NextFetchEvent) {
   const host = request.headers.get('host') ?? ''
   const { pathname } = request.nextUrl
 
@@ -13,6 +15,12 @@ export async function middleware(request: NextRequest) {
   // Não roda updateSession — site publicado é público, sem sessão de painel.
   if (!isAppHost(host) && !pathname.startsWith('/_next') && !pathname.startsWith('/api')) {
     const hostname = host.split(':')[0] ?? host
+
+    // Robô de IA lendo o site do cliente: conta em segundo plano (waitUntil),
+    // a resposta não espera. É a métrica de AEO que dá pra medir de verdade.
+    const bot = request.method === 'GET' ? detectAiBot(request.headers.get('user-agent')) : null
+    if (bot) event.waitUntil(recordAiBotVisit(host, pathname, bot))
+
     const url = request.nextUrl.clone()
     url.pathname = `/${hostname}${pathname === '/' ? '' : pathname}`
     return NextResponse.rewrite(url)

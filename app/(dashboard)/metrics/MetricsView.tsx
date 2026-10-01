@@ -5,7 +5,7 @@
 // Console no beta). Nada aqui é número fabricado: sem dado, mostra zero.
 import { useEffect, useState } from 'react'
 import { buildPresenceChecklist, type PresenceItem } from '@/lib/seo/local-presence'
-import type { SiteVisits } from '@/lib/analytics/queries'
+import type { AiBotVisits, SiteVisits } from '@/lib/analytics/queries'
 import type { ScorePoint } from '@/lib/score/history'
 
 type Pillar = 'seo' | 'geo' | 'aeo' | 'eeat'
@@ -67,12 +67,13 @@ const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','A
 const WEEKDAYS = ['D','S','T','Q','Q','S','S']
 
 export default function MetricsView({
-  siteId, domain, posts = [], visits = null, scoreHistory = [],
+  siteId, domain, posts = [], visits = null, botVisits = null, scoreHistory = [],
   siteStatus = '', gpeModo = '', gpeLink = '', businessName = '', city = '',
   gbpPublishedDates = [], sitemapPages = 0, sitemapPosts = 0,
 }: {
   siteId: string
   visits?: SiteVisits | null
+  botVisits?: AiBotVisits | null
   scoreHistory?: ScorePoint[]
   domain: string
   posts?: PostLite[]
@@ -355,6 +356,43 @@ export default function MetricsView({
                     {visits.devices.mobile} pelo celular, {visits.devices.desktop} pelo computador
                     {visits.devices.tablet > 0 ? `, ${visits.devices.tablet} por tablet` : ''}.
                     Contagem própria do ANCOREO, sem cookie de rastreio de terceiros.
+                  </p>
+                </>
+              )}
+            </div>
+
+            {/* robôs de IA — contados no middleware pelo user-agent (ai_bot_visit) */}
+            <div className="glass card">
+              <h3><i className="ph-duotone ph-robot" /> Robôs de IA lendo seu site</h3>
+              {!botVisits || (botVisits.total === 0 && botVisits.searchTotal === 0) ? (
+                <div className="soon">
+                  <span className="bigic"><i className="ph-duotone ph-robot" /></span>
+                  <span className="pill">Nenhuma leitura ainda</span>
+                  <p>
+                    {siteStatus === 'published'
+                      ? 'Quando o ChatGPT, o Claude, o Perplexity ou o Gemini lerem uma página do seu site, a leitura aparece aqui.'
+                      : 'A contagem começa no momento em que você publica o site.'}
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <div className="stats" style={{ marginTop: '.4rem' }}>
+                    <div className="stat"><div className="n">{botVisits.total}</div><div className="l">leituras por IA (30 dias)</div></div>
+                    <div className="stat"><div className="n">{botVisits.byOwner.length}</div><div className="l">IAs diferentes</div></div>
+                    <div className="stat"><div className="n">{botVisits.searchTotal}</div><div className="l">leituras do Google</div></div>
+                  </div>
+                  {botVisits.byOwner.length > 0 && (
+                    <ul style={{ listStyle: 'none', padding: 0, margin: '1rem 0 0', display: 'grid', gap: '.35rem' }}>
+                      {botVisits.byOwner.map(b => (
+                        <li key={b.dono} style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem' }}>
+                          <span>{b.dono}</span>
+                          <span style={{ opacity: .75 }}>{b.visits} {b.visits === 1 ? 'leitura' : 'leituras'} · última em {shortDay(b.lastSeen.slice(0, 10))}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  <p style={{ marginTop: '.7rem', fontSize: '.82rem', opacity: .75 }}>
+                    Contamos cada vez que o robô de uma IA abre uma página do seu site. Ler não garante ser citado, mas quem não é lido nunca é citado.
                   </p>
                 </>
               )}

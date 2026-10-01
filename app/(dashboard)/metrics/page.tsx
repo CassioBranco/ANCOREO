@@ -2,11 +2,12 @@
 // ANCOREO — /metrics. Visual = protótipo painel/metrics.html (port honesto).
 // Anéis SEO/GEO/AEO + "o que melhorar" = dados REAIS (/api/score).
 // Visitas = REAIS, da nossa própria telemetria (analytics_events / site_view).
+// Robôs de IA = REAIS, contados no middleware pelo user-agent (ai_bot_visit).
 // Ranking de keywords segue "em breve" (depende do Search Console).
 // ============================================================
 import { redirect } from 'next/navigation'
 import { createServerClient } from '@/lib/supabase/server'
-import { getSiteVisits } from '@/lib/analytics/queries'
+import { getAiBotVisits, getSiteVisits } from '@/lib/analytics/queries'
 import { getScoreHistory } from '@/lib/score/history'
 import MetricsView from './MetricsView'
 
@@ -127,14 +128,16 @@ export default async function MetricsPage() {
   // então é seguro passar pros leitores admin abaixo.
   // Visitas (30d) e histórico do score (90d) em paralelo: nenhum depende do outro.
   // O histórico devolve [] enquanto a migration score_snapshots não for aplicada.
-  const [visits, scoreHistory] = await Promise.all([
+  const [visits, scoreHistory, botVisits] = await Promise.all([
     getSiteVisits(siteId, 30),
     getScoreHistory(siteId, 90),
+    getAiBotVisits(siteId, 30),
   ])
 
   return (
     <MetricsView
       visits={visits}
+      botVisits={botVisits}
       scoreHistory={scoreHistory}
       siteId={siteId}
       domain={domain || 'seu site'}

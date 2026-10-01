@@ -20,6 +20,10 @@
 //                              a partir do Host da requisição (o visitante não
 //                              consegue forjar visita pro site de outro cliente).
 //                              props.kind = home | blog | post | loja | produto
+//
+// Gravado SÓ pelo servidor (fora desta allowlist de propósito):
+//  ai_bot_visit              → robô de IA abriu uma página do site do cliente.
+//                              Middleware + lib/analytics/bot-visit.ts.
 
 export const ANALYTICS_EVENTS = [
   'onboarding_start',
