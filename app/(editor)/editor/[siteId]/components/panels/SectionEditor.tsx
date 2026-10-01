@@ -99,13 +99,15 @@ export default function SectionEditor({ siteId, sectionType, niche, onSaved }: P
     return () => window.removeEventListener(EVT_INLINE_CONTENT, onInline)
   }, [sectionType])
 
-  async function save(updated: SectionContent) {
+  // locked: true quando o dono escreveu à mão, false quando aceitou um texto
+  // da IA. Bloco travado é pulado pelo "Preencher tudo com IA" (ai-sections.ts).
+  async function save(updated: SectionContent, locked = true) {
     if (!pageId) return
     setSaving(true)
     const supabase = createBrowserClient()
     await supabase
       .from('sections')
-      .update({ content: updated })
+      .update({ content: updated, locked })
       .eq('page_id', pageId)
       .eq('section_type', sectionType)
     setSaving(false)
@@ -128,7 +130,7 @@ export default function SectionEditor({ siteId, sectionType, niche, onSaved }: P
       const { content: updated } = await res.json()
       if (updated) {
         setContent(updated)
-        await save(updated)
+        await save(updated, false)
       }
     } catch (e) {
       console.error(e)

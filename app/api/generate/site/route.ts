@@ -4,6 +4,7 @@ import { getAnthropicClient, MODELS, cachedSystem, totalTokens, friendlyAIError 
 import { buildSystemPrompt, serializeProfile } from '@/lib/prompts/loader'
 import { deepSanitize } from '@/lib/text/sanitize'
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { saveAiSections } from '@/lib/sites/ai-sections'
 
 export const runtime = 'nodejs'
 // Geração de site completo dura ~90s — acima do timeout antigo de 60s (cliente
@@ -292,19 +293,17 @@ async function saveSections(
     // preenche, no editor, com depoimento de gente que existe. O prompt já pede
     // [], mas o que garante isso é esta linha — instrução de prompt é pedido,
     // não trava. Publicar depoimento inventado é propaganda enganosa no nome do
-    // cliente, então a trava fica no servidor.
+    // cliente, então a trava fica no servidor. Se o bloco já existe, a
+    // saveAiSections não regrava (senão apagaria o depoimento real).
     { section_type: 'testimonials', order_index: 3, content: { items: [] } },
     { section_type: 'faq',          order_index: 4, content: { items: content.faq } },
     { section_type: 'meta',         order_index: 5, content: content.meta },
   ]
 
-  for (const s of sections) {
-    const { error: secErr } = await supabase.from('sections').upsert(
-      { page_id: pageId, tenant_id: tenantId, ...s },
-      { onConflict: 'page_id,section_type' }
-    )
-    if (secErr) return secErr.message
-  }
+  // Regerar não apaga o que o dono fez: bloco editado à mão, depoimento já
+  // cadastrado, foto e telefone ficam (regras em lib/sites/ai-sections.ts).
+  const { error: secErr } = await saveAiSections(supabase, pageId, tenantId, sections)
+  if (secErr) return secErr
 
   // Atualiza meta da página
   const meta = content.meta as { title?: string; description?: string } | undefined
