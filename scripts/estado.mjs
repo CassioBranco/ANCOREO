@@ -90,8 +90,10 @@ const SONDAS = [
   },
   {
     pilar: 'Métricas',
-    nome: 'AEO usa medição real (hoje: amostra sintética)',
-    ok: () => grepCount('isSample', 'lib/aeo') === 0,
+    nome: 'AEO usa medição real, sem amostra sintética na interface',
+    // Duas metades: nenhuma tela com isSample E o cartão de robôs de IA
+    // lendo dado gravado de verdade. Só a primeira passaria com tela vazia.
+    ok: () => grepCount('isSample', 'app lib components') === 0 && grepCount('getAiBotVisits', 'app/(dashboard)') > 0,
   },
   {
     pilar: 'Métricas',
