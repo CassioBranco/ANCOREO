@@ -2,6 +2,7 @@ import type { SiteContent } from '@/lib/templates/example-content'
 import SiteBrand from '../shared/SiteBrand'
 import Icon from '../shared/Icon'
 import type { PaletteColors } from '@/lib/templates/palettes'
+import SiteAnswer from '../shared/SiteAnswer'
 
 function cssVars(p: PaletteColors): string {
   return `:root{--sp:${p.primary};--ss:${p.secondary};--sa:${p.accent};--sb:${p.bg};--sf:${p.surface};--st:${p.text};--sm:${p.muted}}`
@@ -217,6 +218,7 @@ export default function ProfissionalLayout({
             <span className="p-kicker">{c.city}/{c.state} · Desde {new Date().getFullYear() - c.yearsExperience}</span>
             <h1>{c.heroHeadline}</h1>
             <p>{c.heroSub}</p>
+            <SiteAnswer text={c.heroAnswer} />
             <div className="p-hero-cta">
               <a href={whatsapp} className="p-btn">{c.ctaLabel}</a>
               <a href="#especialidades" className="p-btn p-btn-out">Ver especialidades</a>

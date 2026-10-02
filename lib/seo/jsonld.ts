@@ -6,3 +6,13 @@
 export function jsonLdScript(obj: unknown): string {
   return JSON.stringify(obj).replace(/</g, '\\u003c')
 }
+
+// Seletores do trecho que a IA (e assistente de voz) deve ler em voz alta:
+// a resposta direta abaixo do título. Os mesmos usados nos componentes.
+export const SPEAKABLE_HOME = '.site-answer'
+export const SPEAKABLE_POST = '.ancoreo-article-body > p:first-of-type'
+
+/** speakable só quando existe resposta direta de verdade; senão, nada. */
+export function speakableSpec(selector: string, hasAnswer: boolean) {
+  return hasAnswer ? { '@type': 'SpeakableSpecification', cssSelector: [selector] } : undefined
+}

@@ -12,6 +12,8 @@ import { getPublishedPostBySlug } from '@/lib/blog/posts'
 import SiteShell from '@/components/site/SiteShell'
 import BlogArticle from '@/components/blog/BlogArticle'
 import SiteAnalytics from '../../SiteAnalytics'
+import { speakableSpec, SPEAKABLE_POST } from '@/lib/seo/jsonld'
+import { firstParagraph, isDirectAnswer } from '@/lib/seo/score'
 
 type Props = { params: Promise<{ domain: string; slug: string }> }
 
@@ -81,6 +83,8 @@ export default async function PublishedBlogPostPage({ params }: Props) {
     author: { '@type': 'Organization', name: businessName },
     publisher,
     mainEntityOfPage: { '@type': 'WebPage', '@id': url },
+    // 1º parágrafo do artigo = resposta direta ao título (regra answer-first).
+    speakable: speakableSpec(SPEAKABLE_POST, isDirectAnswer(firstParagraph(post.content ?? ''))),
   }
 
   // FAQPage: só perguntas completas; 2+ pra schema não nascer pobre.

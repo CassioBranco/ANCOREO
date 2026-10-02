@@ -2,6 +2,7 @@ import type { SiteContent } from '@/lib/templates/example-content'
 import SiteBrand from '../shared/SiteBrand'
 import Icon from '../shared/Icon'
 import type { PaletteColors } from '@/lib/templates/palettes'
+import SiteAnswer from '../shared/SiteAnswer'
 
 function cssVars(p: PaletteColors): string {
   return `:root{--sp:${p.primary};--ss:${p.secondary};--sa:${p.accent};--sb:${p.bg};--sf:${p.surface};--st:${p.text};--sm:${p.muted}}`
@@ -220,6 +221,7 @@ export default function PortfolioLayout({
               c.heroHeadline
             )}</h1>
             <p>{c.heroSub}</p>
+            <SiteAnswer text={c.heroAnswer} />
             <div className="f-hero-cta">
               <a href={whatsapp} className="f-btn">{c.ctaLabel}</a>
               <a href="#estrutura" className="f-btn f-btn-out">Ver a estrutura</a>

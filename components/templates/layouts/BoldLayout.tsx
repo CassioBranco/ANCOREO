@@ -2,6 +2,7 @@ import type { SiteContent } from '@/lib/templates/example-content'
 import SiteBrand from '../shared/SiteBrand'
 import Icon from '../shared/Icon'
 import type { PaletteColors } from '@/lib/templates/palettes'
+import SiteAnswer from '../shared/SiteAnswer'
 
 function cssVars(p: PaletteColors): string {
   return `:root{--sp:${p.primary};--ss:${p.secondary};--sa:${p.accent};--sb:${p.bg};--sf:${p.surface};--st:${p.text};--sm:${p.muted}}`
@@ -203,6 +204,7 @@ export default function BoldLayout({ c, p, preview }: { c: SiteContent; p: Palet
           <span className="bd-kicker">{c.city} · {c.state}</span>
           <h1>{c.heroHeadline.split(' ').slice(0, 4).join(' ')} <em>{c.heroHeadline.split(' ').slice(4).join(' ')}</em></h1>
           <p className="bd-sub">{c.heroSub}</p>
+          <SiteAnswer text={c.heroAnswer} />
           <div className="bd-hero-cta">
             <a href={whatsapp} className="bd-btn">{c.ctaLabel}</a>
             <a href="#especialidades" className="bd-btn bd-btn-outline">Explorar <Icon name="arrow-down" size={16} /></a>

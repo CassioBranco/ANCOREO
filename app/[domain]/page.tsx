@@ -6,7 +6,8 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { hasSupabaseEnv } from '@/lib/env'
 import { buildSiteContent } from '@/lib/templates/build-site-content'
 import LayoutRenderer from '@/components/templates/LayoutRenderer'
-import { jsonLdScript } from '@/lib/seo/jsonld'
+import { jsonLdScript, speakableSpec, SPEAKABLE_HOME } from '@/lib/seo/jsonld'
+import { isDirectAnswer } from '@/lib/seo/score'
 import SiteAnalytics from './SiteAnalytics'
 import type { SiteContent } from '@/lib/templates/example-content'
 import type { Metadata } from 'next'
@@ -52,7 +53,8 @@ function buildJsonLd(site: {
     '@context': 'https://schema.org',
     '@type': schemaType,
     name: content.businessName,
-    description: content.tagline,
+    // A resposta direta descreve melhor a entidade que o subtítulo de venda.
+    description: content.heroAnswer || content.tagline,
     url: `https://${site.domain}`,
     address: city ? {
       '@type': 'PostalAddress',
@@ -79,7 +81,19 @@ function buildJsonLd(site: {
     })),
   } : null
 
-  return { base, faqSchema }
+  // speakable: aponta a resposta direta abaixo do título (.site-answer) como o
+  // trecho a ser lido/citado. Só sai quando a resposta existe e tem o tamanho.
+  const speakable = speakableSpec(SPEAKABLE_HOME, isDirectAnswer(content.heroAnswer ?? ''))
+  const pageSchema = speakable ? {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: content.businessName,
+    url: `https://${site.domain}`,
+    inLanguage: 'pt-BR',
+    speakable,
+  } : null
+
+  return { base, faqSchema, pageSchema }
 }
 
 // ── Metadata dinâmica ────────────────────────────────────────────────────────
@@ -151,7 +165,7 @@ export default async function PublishedSitePage({ params }: Props) {
     years_experience: content.yearsExperience,
   }
 
-  const { base: jsonLd, faqSchema } = buildJsonLd({ niche: built.niche, domain }, content, jsonLdProfile)
+  const { base: jsonLd, faqSchema, pageSchema } = buildJsonLd({ niche: built.niche, domain }, content, jsonLdProfile)
 
   return (
     <>
@@ -164,6 +178,12 @@ export default async function PublishedSitePage({ params }: Props) {
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: jsonLdScript(faqSchema) }}
+        />
+      )}
+      {pageSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: jsonLdScript(pageSchema) }}
         />
       )}
 

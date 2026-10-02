@@ -6,6 +6,7 @@ import SiteFAQ from '../shared/SiteFAQ'
 import SiteBlog from '../shared/SiteBlog'
 import SiteFooter from '../shared/SiteFooter'
 import SiteSchema from '../shared/SiteSchema'
+import SiteAnswer from '../shared/SiteAnswer'
 
 function cssVars(p: PaletteColors) {
   return `:root{--sp:${p.primary};--ss:${p.secondary};--sa:${p.accent};--sb:${p.bg};--sf:${p.surface};--st:${p.text};--sm:${p.muted};--ink:#161310;--paper:#ECE6D6}`
@@ -94,6 +95,7 @@ export default function JovemLayout({ c, p, preview }: { c: SiteContent; p: Pale
               <p style={{ ...mono, fontSize: '1.05rem', lineHeight: 1.6, maxWidth: '28rem', margin: '0 0 2rem' }}>
                 {c.heroSub}
               </p>
+              <SiteAnswer text={c.heroAnswer} />
 
               <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
                 <a href={href(whatsapp)} style={{

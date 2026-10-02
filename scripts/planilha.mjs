@@ -94,7 +94,6 @@ const FILA = [
   { pilar: 'Métricas', oQue: 'Posição real das palavras-chave, puxada do Search Console', situacao: 'FALTA', quando: SPRINTS.R3 },
 
   { pilar: 'Site builder', oQue: 'Tela de domínio próprio no painel (hoje o cliente não tem onde apontar o DNS)', situacao: 'FALTA', quando: SPRINTS.R2 },
-  { pilar: 'Site builder', oQue: 'Bloco de resposta direta abaixo do título: o trecho que a IA copia ao citar', situacao: 'FALTA', quando: SPRINTS.R2 },
   { pilar: 'Site builder', oQue: 'Content-Signal: separar "pode me citar" de "pode me usar pra treinar"', situacao: 'FALTA', quando: SPRINTS.R3 },
   { pilar: 'Site builder', oQue: 'Site lento não publica (trava acima de 2,5 segundos)', situacao: 'FALTA', quando: SPRINTS.R3 },
   { pilar: 'Site builder', oQue: 'Avisar quando uma página fica a mais de 3 cliques da home', situacao: 'FALTA', quando: SPRINTS.R3 },

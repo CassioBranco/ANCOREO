@@ -20,6 +20,9 @@ import {
   hasCompleteFaq,
   sectionText,
   wordCount,
+  isDirectAnswer,
+  ANSWER_WORDS_MIN,
+  ANSWER_WORDS_MAX,
   TITLE_MIN,
   TITLE_MAX,
   META_MIN,
@@ -194,7 +197,9 @@ function buildAeoChecks(input: SiteScoreInput): SeoCheck[] {
   const items = faqItems(input.sections)
   const complete = items.filter(it => it.question.length > 0 && it.answer.length > 0)
   const concise = complete.length > 0 && complete.every(it => wordCount(it.answer) <= AEO_ANSWER_WORDS_MAX)
-  const cta = asString((findSection(input.sections, 'hero')?.content as { cta_label?: unknown } | null)?.cta_label)
+  const heroContent = findSection(input.sections, 'hero')?.content as { cta_label?: unknown; answer?: unknown } | null
+  const cta = asString(heroContent?.cta_label)
+  const answer = asString(heroContent?.answer)
   // Verbo de posse: o visitante lê a ação que ele vai fazer, não "clique aqui".
   const ctaOk = /^(quero|agendar|ver|solicitar|contratar|falar|conhecer|baixar|garantir|pedir|marcar)/i.test(cta.trim())
 
@@ -207,6 +212,10 @@ function buildAeoChecks(input: SiteScoreInput): SeoCheck[] {
       fix: `Suba a FAQ para ${AEO_FAQ_IDEAL} perguntas: cada pergunta é uma busca que seu site pode responder.` },
     { id: 'faq-objetiva', ok: concise, label: `Respostas objetivas (até ${AEO_ANSWER_WORDS_MAX} palavras)`, weight: 10,
       fix: `Deixe cada resposta da FAQ com até ${AEO_ANSWER_WORDS_MAX} palavras.` },
+    { id: 'resposta-direta', ok: isDirectAnswer(answer), label: `Resposta direta no topo (${ANSWER_WORDS_MIN} a ${ANSWER_WORDS_MAX} palavras)`, weight: 12,
+      fix: answer.trim()
+        ? `A resposta do topo tem ${wordCount(answer)} palavras. Deixe entre ${ANSWER_WORDS_MIN} e ${ANSWER_WORDS_MAX}: é o trecho que a IA copia ao citar seu site.`
+        : 'Preencha a "Resposta direta" no topo do site (editor, bloco do topo): quem é o negócio, o que faz e onde, em 40 a 60 palavras.' },
     { id: 'oferta-itens', ok: servicesCount(input.sections) >= 3, label: 'Oferta em itens (a IA cita como lista)', weight: 8,
       fix: 'Liste pelo menos 3 itens de serviço ou produto.' },
     { id: 'cta-verbo', ok: ctaOk, label: 'Botão principal com verbo de ação', weight: 8,

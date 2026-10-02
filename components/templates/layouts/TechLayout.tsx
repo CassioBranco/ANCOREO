@@ -6,6 +6,7 @@ import SiteFAQ from '../shared/SiteFAQ'
 import SiteBlog from '../shared/SiteBlog'
 import SiteFooter from '../shared/SiteFooter'
 import SiteSchema from '../shared/SiteSchema'
+import SiteAnswer from '../shared/SiteAnswer'
 
 function cssVars(p: PaletteColors) {
   return `:root{--sp:${p.primary};--ss:${p.secondary};--sa:${p.accent};--sb:${p.bg};--sf:${p.surface};--st:${p.text};--sm:${p.muted};--line:rgb(255 255 255 / .1)}`
@@ -115,6 +116,7 @@ export default function TechLayout({ c, p, preview }: { c: SiteContent; p: Palet
               <p style={{ fontSize: '1.25rem', color: 'var(--sm)', lineHeight: 1.6, margin: '0 0 2.2rem', maxWidth: '30rem' }}>
                 {c.heroSub}
               </p>
+              <SiteAnswer text={c.heroAnswer} />
               <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
                 <a href={href(whatsapp)} style={btn}>{c.ctaLabel} <Icon name="arrow-right" size={17} /></a>
                 <a href={href(`tel:${c.ctaPhone.replace(/\D/g, '')}`)} style={btnGhost}>{c.ctaPhone}</a>

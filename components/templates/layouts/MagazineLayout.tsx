@@ -2,6 +2,7 @@ import type { SiteContent } from '@/lib/templates/example-content'
 import SiteBrand from '../shared/SiteBrand'
 import Icon from '../shared/Icon'
 import type { PaletteColors } from '@/lib/templates/palettes'
+import SiteAnswer from '../shared/SiteAnswer'
 
 function cssVars(p: PaletteColors) {
   return `:root{--sp:${p.primary};--ss:${p.secondary};--sa:${p.accent};--sb:${p.bg};--sf:${p.surface};--st:${p.text};--sm:${p.muted}}`
@@ -143,6 +144,7 @@ export default function MagazineLayout({ c, p, preview }: { c: SiteContent; p: P
         <div className="mag-title">
           <a className="mag-title-name" href={href('/')}><SiteBrand c={c}>{c.businessName}</SiteBrand></a>
           <p className="mag-tagline">{c.tagline}</p>
+          <SiteAnswer text={c.heroAnswer} style={{ margin: '.8rem auto 0', textAlign: 'center' }} />
         </div>
         <nav className="mag-navbar">
           <a href={href('/')} className="on">Início</a>

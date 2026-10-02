@@ -6,6 +6,7 @@
 // ============================================================
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { buildSiteContent } from '@/lib/templates/build-site-content'
+import { firstParagraph, isDirectAnswer, wordCount, ANSWER_WORDS_MIN, ANSWER_WORDS_MAX } from '@/lib/seo/score'
 
 export type IssueLevel = 'error' | 'warning'
 export type ValidationIssue = { rule: string; level: IssueLevel; message: string }
@@ -126,6 +127,13 @@ export function validateBlogPostForPublish(args: {
   const orphanH2 = findOrphanH2(html)
   if (orphanH2.length > 0) {
     warnings.push({ rule: 'h2-autossuficiente', level: 'warning', message: `${orphanH2.length} subtítulo(s) começam com referência órfã ("${orphanH2[0]}"). A IA lê cada bloco isolado — a 1ª frase após o H2 deve responder direto (Regra AEO 3).` })
+  }
+
+  // Answer-first: o 1º parágrafo responde o título sozinho, no tamanho que a
+  // IA copia inteiro. Aviso, não erro: não trava quem já escreveu o artigo.
+  const lead = firstParagraph(html)
+  if (!isDirectAnswer(lead)) {
+    warnings.push({ rule: 'resposta-primeiro', level: 'warning', message: `O primeiro parágrafo tem ${wordCount(lead)} palavras. Deixe entre ${ANSWER_WORDS_MIN} e ${ANSWER_WORDS_MAX}, respondendo o título sozinho: é o trecho que a IA copia ao citar o artigo.` })
   }
 
   return { ok: errors.length === 0, errors, warnings }

@@ -147,6 +147,7 @@ ESTRUTURA DE SAÍDA (JSON):
   "hero": {
     "headline": "string — o que o negócio faz + cidade (só cite a cidade se ela estiver no perfil), máx 60 chars",
     "sub": "string — proposta de valor em 1-2 frases baseada no que o perfil descreve, sem gerundismo",
+    "answer": "string — RESPOSTA DIRETA de 40 a 60 palavras, o trecho que a IA copia ao citar o site. Primeira frase: nome do negócio + o que faz + cidade (só cite a cidade se ela estiver no perfil). Depois: para quem atende e o que diferencia, só com fatos do perfil. Terceira pessoa, sem pergunta, sem CTA, sem 'nós'. Tem que fazer sentido lido sozinho, fora do site",
     "cta_label": "string — verbo de posse, ex: Quero Agendar",
     "cta_phone": "string — telefone do perfil, ou string vazia se não houver"
   },

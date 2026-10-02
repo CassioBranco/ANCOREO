@@ -462,6 +462,7 @@ function getEditableFields(
       return [
         { key: 'headline', label: 'Título principal', multiline: false },
         { key: 'sub', label: 'Subtítulo', multiline: true },
+        { key: 'answer', label: 'Resposta direta (40 a 60 palavras: quem é, o que faz, onde)', multiline: true },
         { key: 'cta_label', label: 'Botão CTA', multiline: false },
       ]
     case 'about':

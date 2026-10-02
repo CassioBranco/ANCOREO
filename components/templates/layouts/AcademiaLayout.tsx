@@ -2,6 +2,7 @@ import type { SiteContent } from '@/lib/templates/example-content'
 import SiteBrand from '../shared/SiteBrand'
 import Icon from '../shared/Icon'
 import type { PaletteColors } from '@/lib/templates/palettes'
+import SiteAnswer from '../shared/SiteAnswer'
 
 function cssVars(p: PaletteColors) {
   return `:root{--sp:${p.primary};--ss:${p.secondary};--sa:${p.accent};--sb:${p.bg};--sf:${p.surface};--st:${p.text};--sm:${p.muted}}`
@@ -236,6 +237,7 @@ export default function AcademiaLayout({ c, p, preview }: { c: SiteContent; p: P
               {firstWord && <span className="ac-mark">{firstWord}</span>}{restWords ? ` ${restWords}` : ''}
             </h1>
             <p>{c.heroSub}</p>
+            <SiteAnswer text={c.heroAnswer} />
             <div className="ac-hero-cta">
               <a href="#turmas" className="ac-btn">Ver turmas e idiomas</a>
               <a href={href(whatsapp)} className="ac-btn ac-btn-ghost">Agendar aula grátis</a>

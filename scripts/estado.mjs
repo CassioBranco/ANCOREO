@@ -74,6 +74,15 @@ const SONDAS = [
     ok: () => existsSync('app/api/publish/route.ts') && grepCount("api/publish'", 'app components') > 0,
   },
   {
+    pilar: 'Site builder',
+    nome: 'Resposta direta abaixo do título (o trecho que a IA copia ao citar)',
+    // Três metades: o componente chamado pelos layouts, a checagem na nota e o
+    // speakable no JSON-LD. Só o componente sem a nota seria texto que ninguém cobra.
+    ok: () => grepCount('<SiteAnswer', 'components/templates/layouts') >= 10
+           && grepCount("'resposta-direta'", 'lib/seo/site-score.ts') > 0
+           && grepCount('speakableSpec\\(', 'app') > 0,
+  },
+  {
     pilar: 'Blog builder',
     nome: 'Editor de post chama a rota de publicação de blog',
     ok: () => grepCount('api/publish/blog', 'app components') > 0,

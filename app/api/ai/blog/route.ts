@@ -68,7 +68,7 @@ ${knowledge}
 
 Estrutura obrigatória:
 1. H1: keyword + cidade (máx 60 chars)
-2. Intro direta (2-3 frases, sem "No mundo atual" ou gerundismo)
+2. Resposta direta: o PRIMEIRO <p> do content responde o título sozinho, em 40 a 60 palavras (é o trecho que a IA copia ao citar o artigo). Sem "No mundo atual", sem gerundismo, sem pergunta retórica
 3. 3-5 seções H2 (cada H2 = resposta autossuficiente na primeira linha)
 4. FAQ com EXATAMENTE 6 perguntas + respostas diretas (2-4 linhas cada)
 5. CTA final com verbo de posse
