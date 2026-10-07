@@ -74,6 +74,28 @@
 - O tráfego dessas funções entra nos números gerais do Search Console. Uma fonte de terceiros diz que em jun/2026 surgiu um **relatório de desempenho de IA generativa** no Search Console, começando por um subconjunto de sites no Reino Unido `[A CONFIRMAR: ver se já chegou ao Brasil]`.
 - Estudo da Ahrefs (via terceiros): um AI Overview reduziu em 58% os cliques para o primeiro resultado `[VENDOR]`.
 
+### 3.1 Novidades do Google em 2026 que mudam o trabalho
+
+**Ranking local (oficial, Central de Ajuda do Perfil de Empresa).** O Google diz que o resultado local depende de três fatores: **relevância** (o perfil combina com a busca), **distância** (da localização citada na busca ou da posição do usuário) e **destaque** (quão conhecido o negócio é, offline e online: links, artigos, diretórios). Diz também, com todas as letras, que **número e nota das avaliações entram no ranking local**. Um negócio mais longe pode ganhar de um mais perto se o Google julgar que ele responde melhor `[FONTE: support.google.com/business/answer/7091]`.
+
+**Relatório de IA generativa no Search Console.** Lançado em 3/jun/2026, primeiro para parte dos sites no Reino Unido. Mostra **só impressões** em AI Overviews e AI Mode (sem cliques, CTR, posição ou consulta). Dados a partir de 18/mai/2026, sem histórico. Não soma impressões novas, só separa parte das que já existiam `[FONTE secundária, A CONFIRMAR se chegou ao Brasil]`.
+
+**Filtro de consultas de marca no Search Console.** Anunciado em nov/2025 e liberado para todos os sites elegíveis em mar/2026. Separa busca pelo nome da marca de busca genérica. O Google usa IA para classificar e avisa que erra `[FONTE secundária]`.
+> Para o cliente: é a métrica mais honesta de "a marca está crescendo". Busca de marca subindo = palestra, Instagram e Perfil funcionando.
+
+**Preferred Sources (Fontes preferidas).** O usuário marca um site como fonte preferida. Desde mai/2026, quando esse site aparece citado em AI Overview ou AI Mode, ganha um selo "Preferido". Mais de 600 mil fontes já foram escolhidas e o clique numa fonte preferida é cerca de 2 vezes maior, segundo o Google. Há um botão oficial para pôr no site. Ainda não se sabe se vira fator de ranking `[FONTE secundária, fontes divergem]`.
+
+**Personal Intelligence no AI Mode.** O AI Mode pode usar Gmail e outros apps do usuário para personalizar a resposta. Duas pessoas na mesma cidade, mesma busca, recebem respostas diferentes. Posição única no ranking vira métrica fraca `[FONTE secundária]`.
+
+**Agentes de busca e comércio.** Google anunciou agentes que acompanham a web por conta do usuário (planos pagos). Recomendação recorrente: manter Perfil de Empresa, horários, preços e feeds do Merchant Center **exatos e legíveis por máquina**, porque o agente lê direto da fonte `[FONTE secundária]`.
+
+**Diretrizes dos avaliadores de qualidade (jan/2025).** Conteúdo principal todo ou quase todo gerado por IA, sem valor acrescentado, recebe a **nota mais baixa**. Entrou também o conceito de **"filler"** (enchimento): texto que infla a página e atrasa a resposta útil pode levar nota baixa mesmo sem ser nocivo. Avaliadores não ranqueiam, mas treinam e validam o algoritmo `[FONTE secundária]`.
+
+**Política de spam vale para IA.** Abuso de conteúdo em escala (março/2024) vale para conteúdo feito por gente ou por IA: o problema é escala com intenção de manipular, não a ferramenta. Relato de mai/2026 diz que as políticas de spam valem também para AI Overviews e AI Mode `[A CONFIRMAR]`.
+> Para o ANCOREO e para os blogs dos clientes: gerar texto com IA é permitido. Publicar em volume sem dado real, sem voz do cliente e sem revisão é o que derruba.
+
+**Checklist da Aleyda Solis (atualizado em mai/2026).** Organiza o trabalho em quatro estados de uma marca na resposta da IA: **visível, citada, recomendada ou ausente**. E em quais páginas próprias e de terceiros moldam essa resposta `[FONTE: aleydasolis.com]`.
+
 ---
 
 ## 4. Checklist novo para posicionar um cliente
@@ -87,6 +109,10 @@ Aplicar além dos 8 Passos do Posicionamento Orgânico:
 5. **Um trecho, uma ideia**: parágrafos curtos sob subtítulo descritivo, resposta na primeira frase.
 6. **Medir recomendação, não só citação**: buscar "melhor [serviço] em [cidade]" em ChatGPT, Gemini, Perplexity e AI Overviews uma vez por mês e registrar se a marca é **recomendada**, só citada ou ausente.
 7. **Fonte primária ou nada**: dado de IA sem origem não entra em artigo.
+8. **Avaliações como fator de ranking**: o Google confirma que número e nota entram no ranking local. Rotina de pedido de avaliação (Passo 3) deixa de ser "boa prática" e vira obrigação.
+9. **Busca de marca no Search Console**: ligar o filtro de consultas de marca e acompanhar mês a mês. É a prova de que a palestra e as redes estão gerando demanda.
+10. **Dados exatos para agentes**: horário, telefone, preço e serviços iguais no site, no Perfil e nas redes. Agente de IA não perdoa divergência.
+11. **Sem enchimento**: cortar introdução longa. Resposta primeiro, contexto depois.
 
 ---
 
@@ -109,10 +135,17 @@ Nada disso foi implementado. São sugestões.
 
 ## 7. Cursos do Google
 
-- **Skillshop** tem certificações de Google Ads, Analytics e YouTube, mas **não** um certificado isolado de SEO `[FONTE de baixa qualidade]`.
-- **Digital Garage / Grow with Google** (`learndigital.withgoogle.com`) tem o curso gratuito "Fundamentos de Marketing Digital", com SEO como parte. Há versão em português `[A CONFIRMAR]`.
-- **Coursera**, "Google Digital Marketing & E-commerce", é pago e cobre Search Console e GA4 `[FONTE de baixa qualidade]`.
-- Os melhores materiais do Google para SEO são a **documentação do Search Central** (gratuita), o Search Console Training no YouTube e o Search Off the Record. Não foram lidos aqui.
+O Google **não tem** um curso nem certificado só de SEO. A trilha recomendada, em ordem:
+
+| Ordem | Material | Custo | Idioma |
+|---|---|---|---|
+| 1 | **Guia de introdução ao SEO** (SEO Starter Guide) e **Search Essentials** no Search Central | grátis | tem PT-BR |
+| 2 | **Central de Ajuda do Search Console** e canal **Google Search Central** no YouTube | grátis | parte em PT |
+| 3 | **Princípios do marketing digital** (Skillshop / Grow with Google), acreditado pelo IAB | grátis | PT |
+| 4 | **Certificado Profissional Marketing Digital e E-commerce do Google** (Coursera), cobre Search Console e GA4 | assinatura Coursera, verificar preço | **PT-BR** |
+| 5 | **Skillshop**: Google Analytics e Perfil de Empresa | grátis | PT |
+
+Endereços: `grow.google/intl/pt/courses-and-tools/` e `skillshop.withgoogle.com/intl/pt-BR_ALL/`. Os cursos não foram feitos nem lidos aqui, só localizados.
 
 ## Fontes
 
@@ -130,4 +163,16 @@ Nada disso foi implementado. São sugestões.
 - [SEOs Diners Club: estudo de 98 mil citações](https://seosdinersclub.beehiiv.com/p/seos-diners-club-215-why-is-ai-ignoring-you-98-000-citation-rows-have-the-answer)
 - [Self-promotional Listicles Help Competitors Win AI Search](https://letsdatascience.com/news/self-promotional-listicles-help-competitors-win-ai-search-94bd402d)
 - [Semantic SEO: Entity Architecture (seostrategy.co.uk)](https://www.seostrategy.co.uk/guide/semantic-search/)
+- [How to improve your local ranking on Google (Google)](https://support.google.com/business/answer/7091?hl=en)
+- [Quality raters now assess AI-generated content (Search Engine Land)](https://searchengineland.com/google-quality-raters-content-ai-generated-454161)
+- [March 2024 core update and spam policies (Google)](https://developers.google.com/search/blog/2024/03/core-update-spam-policies)
+- [GSC Generative AI report (Neil Patel)](https://neilpatel.com/blog/gsc-ai-search-data-generative-ai-report/)
+- [GSC AI performance reports, the clicks problem (Crawlraven)](https://crawlraven.com/blog/gsc-ai-performance-reports)
+- [Branded queries filter to all sites (SEO Sherpa)](https://seosherpa.com/google-expands-search-console-branded-queries-filter-to-all-eligible-sites/)
+- [Preferred Sources in AI Mode (9to5Google)](https://9to5google.com/2026/05/27/google-ai-mode-preferred-sources/)
+- [Personal Intelligence in AI Mode (ALM Corp)](https://almcorp.com/blog/google-personal-intelligence-ai-mode-complete-guide/)
+- [Google I/O 2026: SEO e GEO (Passionfruit)](https://www.getpassionfruit.com/blog/google-i-o-2026-every-announcement-and-what-it-means-for-seo-and-geo)
+- [AI Search Optimization Checklist (Aleyda Solis)](https://aleydasolis.com/en/ai-search/ai-search-optimization-checklist)
+- [Grow with Google, cursos em português](https://grow.google/intl/pt/courses-and-tools/)
+- [Certificado Marketing Digital e E-commerce do Google (Coursera)](https://www.coursera.org/professional-certificates/marketing-digital-e-e-commerce-do-google)
 - [Query Fan-Out (Ekamoira)](https://www.ekamoira.com/blog/query-fan-out-original-research-on-how-ai-search-multiplies-every-query-and-why-most-brands-are-invisible)
