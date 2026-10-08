@@ -49,6 +49,17 @@ export function firstParagraph(content: string): string {
   return contentParagraphs(content)[0] ?? ''
 }
 
+// Resposta direta (answer-first): o parágrafo logo abaixo do título que a IA
+// copia ao citar a página. Curto demais não responde; longo demais a IA corta
+// no meio. Mesma régua pro topo do site (hero.answer) e pro 1º parágrafo do post.
+export const ANSWER_WORDS_MIN = 40
+export const ANSWER_WORDS_MAX = 60
+
+export function isDirectAnswer(text: string): boolean {
+  const n = wordCount(text)
+  return n >= ANSWER_WORDS_MIN && n <= ANSWER_WORDS_MAX
+}
+
 /** FAQ tem pelo menos uma pergunta completa (pergunta E resposta)? */
 export function hasCompleteFaq(faq: FaqItem[] | null | undefined): boolean {
   return (faq ?? []).some(f => (f?.question ?? '').trim().length > 0 && (f?.answer ?? '').trim().length > 0)

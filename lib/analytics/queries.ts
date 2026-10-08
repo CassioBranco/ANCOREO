@@ -96,3 +96,73 @@ export async function getSiteVisits(siteId: string, days = 30): Promise<SiteVisi
   out.sessions = sessions.size
   return out
 }
+
+// ── Robôs de IA ──────────────────────────────────────────────
+// Gravados pelo middleware (lib/analytics/bot-visit.ts), não pelo navegador.
+// É a única métrica de AEO que o MVP mede de verdade e de graça.
+
+export type BotCount = { dono: string; ia: boolean; visits: number; lastSeen: string }
+
+export type AiBotVisits = {
+  /** visitas de robôs de IA no período (sem o Googlebot) */
+  total: number
+  previousTotal: number
+  /** visitas do Googlebot no período, mostradas à parte: é busca, não IA */
+  searchTotal: number
+  /** um item por dono (ChatGPT, Claude…), do mais ativo ao menos */
+  byOwner: BotCount[]
+  /** páginas mais lidas pelos robôs de IA */
+  topPaths: { path: string; visits: number }[]
+  days: number
+}
+
+export async function getAiBotVisits(siteId: string, days = 30): Promise<AiBotVisits> {
+  const empty: AiBotVisits = { total: 0, previousTotal: 0, searchTotal: 0, byOwner: [], topPaths: [], days }
+  if (!siteId) return empty
+
+  let admin: ReturnType<typeof createAdminClient>
+  try {
+    admin = createAdminClient()
+  } catch {
+    return empty
+  }
+
+  const now = Date.now()
+  const cutoff = new Date(now - days * 86400_000).toISOString()
+  const { data, error } = await admin
+    .from('analytics_events')
+    .select('created_at, path, props')
+    .eq('event', 'ai_bot_visit')
+    .eq('props->>site_id', siteId)
+    .gte('created_at', new Date(now - 2 * days * 86400_000).toISOString())
+    .order('created_at', { ascending: true })
+    .limit(20000)
+
+  if (error || !data) return empty
+
+  const owners = new Map<string, BotCount>()
+  const paths = new Map<string, number>()
+  for (const row of data) {
+    const props = (row.props ?? {}) as { dono?: string; ia?: boolean }
+    const createdAt = row.created_at as string
+    const ia = props.ia !== false
+    if (createdAt < cutoff) { if (ia) empty.previousTotal++; continue }
+    if (!ia) { empty.searchTotal++; continue }
+
+    empty.total++
+    const dono = props.dono ?? 'Outro'
+    const cur = owners.get(dono) ?? { dono, ia, visits: 0, lastSeen: createdAt }
+    cur.visits++
+    cur.lastSeen = createdAt // linhas vêm em ordem crescente
+    owners.set(dono, cur)
+    const path = (row.path as string | null) ?? '/'
+    paths.set(path, (paths.get(path) ?? 0) + 1)
+  }
+
+  empty.byOwner = Array.from(owners.values()).sort((a, b) => b.visits - a.visits)
+  empty.topPaths = Array.from(paths.entries())
+    .map(([path, visits]) => ({ path, visits }))
+    .sort((a, b) => b.visits - a.visits)
+    .slice(0, 5)
+  return empty
+}

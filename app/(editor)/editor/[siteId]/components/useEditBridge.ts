@@ -144,7 +144,8 @@ export function useEditBridge(
     const supabase = createBrowserClient()
     const { error } = await supabase
       .from('sections')
-      .update({ content: row.content })
+      // editado à mão no preview: trava contra o "Preencher tudo com IA"
+      .update({ content: row.content, locked: true })
       .eq('page_id', pageId)
       .eq('section_type', sectionType)
     if (savedTimerRef.current) clearTimeout(savedTimerRef.current)

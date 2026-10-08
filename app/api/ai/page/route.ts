@@ -4,6 +4,7 @@ import { getAnthropicClient, MODELS, cachedSystem, friendlyAIError } from '@/lib
 import { buildSystemPrompt, serializeProfile } from '@/lib/prompts/loader'
 import { deepSanitize } from '@/lib/text/sanitize'
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { saveAiSections } from '@/lib/sites/ai-sections'
 
 export const runtime = 'nodejs'
 // Regenerar uma página inteira pode passar de 60s. Requer Fluid Compute (ver generate/site).
@@ -112,11 +113,9 @@ faq deve ter EXATAMENTE 6 perguntas. "testimonials" sempre vazio. Nada além do 
         { section_type: 'faq',          order_index: 4, content: { items: parsed.faq } },
         { section_type: 'meta',         order_index: 5, content: parsed.meta },
       ]
-      for (const s of sections) {
-        await (supabase as unknown as SupabaseClient)
-          .from('sections')
-          .upsert({ page_id: page.id, tenant_id: tenantId, ...s }, { onConflict: 'page_id,section_type' })
-      }
+      // Bloco editado à mão, foto e telefone do dono ficam como estão
+      // (regras em lib/sites/ai-sections.ts).
+      await saveAiSections(supabase as unknown as SupabaseClient, page.id, tenantId, sections)
     }
   }
 

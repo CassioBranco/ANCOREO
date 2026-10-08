@@ -76,7 +76,9 @@ export default function SectionEditor({
     return () => window.removeEventListener(EVT_INLINE_CONTENT, onInline)
   }, [sectionType])
 
-  async function save(updated: SectionContent) {
+  // locked: true quando o dono escreveu à mão, false quando aceitou um texto
+  // da IA. Bloco travado é pulado pelo "Preencher tudo com IA" (ai-sections.ts).
+  async function save(updated: SectionContent, locked = true) {
     if (!pageId) { setSaveError('A página ainda não foi carregada. Tente novamente.'); return }
     setSaving(true)
     setSaveError('')
@@ -84,12 +86,13 @@ export default function SectionEditor({
       const supabase = createBrowserClient()
       const { data, error } = await supabase
         .from('sections')
-        .update({ content: updated })
+        .update({ content: updated, locked })
         .eq('page_id', pageId)
         .eq('section_type', sectionType)
         .select('id')
       if (error || !data?.length) throw new Error('Conteúdo não salvo. Tente novamente.')
       onContentChange?.(sectionType, updated)
+      // avisa a ponte de edição: o preview espelha o texto novo sem reload
       window.dispatchEvent(new CustomEvent(EVT_PANEL_SAVED, { detail: { sectionType, content: updated } }))
       onSaved()
     } catch {
@@ -113,7 +116,7 @@ export default function SectionEditor({
       const { content: updated } = await res.json()
       if (updated) {
         setContent(updated)
-        await save(updated)
+        await save(updated, false)
       }
     } catch (e) {
       console.error(e)
@@ -428,6 +431,7 @@ function getEditableFields(
       return [
         { key: 'headline', label: 'Título principal', multiline: false },
         { key: 'sub', label: 'Subtítulo', multiline: true },
+        { key: 'answer', label: 'Resposta direta (40 a 60 palavras: quem é, o que faz, onde)', multiline: true },
         { key: 'cta_label', label: 'Botão CTA', multiline: false },
       ]
     case 'about':

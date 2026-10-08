@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next'
 import { headers } from 'next/headers'
+import { AI_BOTS } from '@/lib/seo/ai-bots'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://ancoreo.com.br'
 
@@ -11,15 +12,9 @@ function isAppHost(host: string): boolean {
   return false
 }
 
-// Bots de IA generativa — SEMPRE liberados (AEO Regra 1).
-const AI_BOTS = [
-  'GPTBot', 'OAI-SearchBot', 'ChatGPT-User',           // OpenAI
-  'Google-Extended', 'Googlebot',                       // Gemini / AI Overviews + busca
-  'Anthropic-AI', 'ClaudeBot', 'Claude-Web', 'Claude-SearchBot', // Claude
-  'PerplexityBot', 'Perplexity-User',                   // Perplexity (crawler + fetch on-demand)
-  'Applebot-Extended', 'YouBot', 'cohere-ai',           // Apple / You.com / Cohere
-  'meta-externalagent', 'Bytespider', 'Amazonbot',      // Meta AI / TikTok / Amazon
-]
+// Bots de IA generativa — SEMPRE liberados (AEO Regra 1). Lista única em
+// lib/seo/ai-bots.ts (a mesma que o middleware usa pra contar as visitas).
+const AI_BOT_UAS = AI_BOTS.map(b => b.ua)
 
 // robots.txt host-aware: site publicado serve o seu; painel serve o do app.
 export default async function robots(): Promise<MetadataRoute.Robots> {
@@ -31,7 +26,7 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
     const hostname = host.split(':')[0] ?? host
     return {
       rules: [
-        ...AI_BOTS.map(userAgent => ({ userAgent, allow: '/' })),
+        ...AI_BOT_UAS.map(userAgent => ({ userAgent, allow: '/' })),
         { userAgent: '*', allow: '/' },
       ],
       sitemap: `https://${hostname}/sitemap.xml`,
@@ -41,7 +36,7 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
   // ── Painel ANCOREO ──────────────────────────────────────────────────────────
   return {
     rules: [
-      ...AI_BOTS.map(userAgent => ({ userAgent, allow: '/' })),
+      ...AI_BOT_UAS.map(userAgent => ({ userAgent, allow: '/' })),
       { userAgent: '*', allow: '/', disallow: ['/api/', '/(dashboard)/'] },
     ],
     sitemap: `${APP_URL}/sitemap.xml`,

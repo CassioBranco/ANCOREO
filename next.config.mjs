@@ -21,6 +21,13 @@ const nextConfig = {
     // TypeScript stricto é validado localmente; não bloqueia deploy do protótipo
     ignoreBuildErrors: true,
   },
+  async redirects() {
+    return [
+      // /aeo mostrava visibilidade em IA com amostra sintética e foi apagada
+      // (decisão do Cássio, 01/10). A medição real (robôs de IA) vive em /metrics.
+      { source: '/aeo', destination: '/metrics', permanent: false },
+    ]
+  },
   async headers() {
     return [
       {

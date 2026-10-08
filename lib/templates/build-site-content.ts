@@ -113,7 +113,7 @@ export async function buildSiteContent(
   const posToCss = (p?: { x?: number; y?: number } | null): string =>
     `${Math.max(0, Math.min(100, p?.x ?? 50))}% ${Math.max(0, Math.min(100, p?.y ?? 50))}%`
 
-  const hero  = sectionMap['hero']   as { headline?: string; sub?: string; cta_label?: string; cta_phone?: string; image?: string; image_pos?: { x?: number; y?: number } } | undefined
+  const hero  = sectionMap['hero']   as { headline?: string; sub?: string; answer?: string; cta_label?: string; cta_phone?: string; image?: string; image_pos?: { x?: number; y?: number } } | undefined
   // Telefone de conversão: o WhatsApp REAL que o cliente cadastrou (aba Marca)
   // vence o cta_phone que a IA escreveu no hero. É o que dispara o CTA de contato —
   // foco em conversão: o botão tem que cair no WhatsApp verdadeiro, não num número fictício.
@@ -139,6 +139,7 @@ export async function buildSiteContent(
     tagline:         hero?.sub ?? '',
     heroHeadline:    hero?.headline ?? '',
     heroSub:         hero?.sub ?? '',
+    heroAnswer:      hero?.answer?.trim() || undefined,
     ctaLabel:        hero?.cta_label ?? 'Falar conosco',
     ctaPhone:        contactPhone,
     about:           about?.body ?? '',
