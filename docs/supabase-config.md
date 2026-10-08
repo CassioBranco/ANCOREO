@@ -3,7 +3,7 @@
 > Última atualização: 2026-06-03
 
 ## Projeto
-- Nome: **HARP.IA**
+- Nome: **HARP.IA** (nome legado no painel; o produto é ANCOREO)
 - Organização: Dicas do Dove (plano Free)
 - Região: **South America (São Paulo)** — sa-east-1
 - Compute: Nano (free tier)
