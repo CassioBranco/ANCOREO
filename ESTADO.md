@@ -67,19 +67,24 @@ Zero linhas não significa quebrado: significa que ninguém exercitou aquele cam
 
 Branch: `master`
 
-- `3237554` merge: junta a navegação SPA com os 8 commits que estavam só no remoto _(11 seconds ago)_
-- `4d3bfe9` spa: navegacao de aplicativo no painel e no editor _(13 minutes ago)_
-- `699a96b` aeo: resposta direta abaixo do titulo, o trecho que a IA copia ao citar _(6 days ago)_
-- `f66646c` telemetria: uma visita deixa de virar varias sessoes no funil _(7 days ago)_
-- `940052f` editor: "Preencher tudo com IA" deixa de apagar o trabalho do dono _(7 days ago)_
+- `22000e2` fix(#27): falha de geração com motivo, cota justa e editor mostra o que barra a publicação _(5 minutes ago)_
+- `b4ba746` docs: repo GitHub agora é CassioBranco/ANCOREO _(14 minutes ago)_
+- `2f2d69c` planilha: regera PAINEL e ESTADO depois do merge _(15 minutes ago)_
+- `3237554` merge: junta a navegação SPA com os 8 commits que estavam só no remoto _(15 minutes ago)_
+- `4d3bfe9` spa: navegacao de aplicativo no painel e no editor _(29 minutes ago)_
 
-**Trabalho não commitado:** nenhum
+**Trabalho não commitado:** 
+
+```
+M ESTADO.md
+ M PAINEL.md
+ M scripts/planilha.mjs
+```
 
 **Commits locais não enviados:** 
 
 ```
-3237554 merge: junta a navegação SPA com os 8 commits que estavam só no remoto
-4d3bfe9 spa: navegacao de aplicativo no painel e no editor
+22000e2 fix(#27): falha de geração com motivo, cota justa e editor mostra o que barra a publicação
 ```
 
 ---

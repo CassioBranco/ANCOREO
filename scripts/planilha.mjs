@@ -98,7 +98,7 @@ const FILA = [
   { pilar: 'Site builder', oQue: 'Site lento não publica (trava acima de 2,5 segundos)', situacao: 'FALTA', quando: SPRINTS.R3 },
   { pilar: 'Site builder', oQue: 'Avisar quando uma página fica a mais de 3 cliques da home', situacao: 'FALTA', quando: SPRINTS.R3 },
 
-  { pilar: 'Onboarding', oQue: 'Descobrir por que 9 sites são gerados e só 2 são publicados', situacao: 'FALTA', quando: SPRINTS.R2 },
+  { pilar: 'Onboarding', oQue: 'Descobrir por que 9 sites são gerados e só 2 são publicados (6 eram teste; falha sem motivo e publicação sem lista corrigidas)', situacao: 'PRONTO', quando: SPRINTS.R2 },
   { pilar: 'Onboarding', oQue: 'Opção Enterprise: sai do fluxo normal e cai no e-mail institucional', situacao: 'FALTA', quando: SPRINTS.R2 },
   { pilar: 'Blog builder', oQue: 'Publicar 5 posts de verdade e conferir os links entre eles', situacao: 'FALTA', quando: SPRINTS.R3 },
 

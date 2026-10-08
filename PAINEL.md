@@ -4,20 +4,19 @@
 > Para abrir no Excel: **PAINEL.csv**, na mesma pasta.
 > Última geração: **2026-10-08**
 
-`███████████░░░░░░░░░` **56%** — 15 de 27 itens do MVP prontos
-**-37 dias** para o lançamento (01/09)
+`████████████░░░░░░░░` **59%** — 16 de 27 itens do MVP prontos
 **3 itens dependem de você** para destravar
 
 A coluna **como sabemos** é o que separa esta planilha de uma lista de desejos.
 _Verificado no código_ quer dizer que um teste automático achou a coisa
 funcionando de verdade. _Plano_ quer dizer que combinamos fazer, e só.
 
-## Onboarding — 1/3
+## Onboarding — 2/3
 
 | nº | o que é | situação | como sabemos | quando |
 |---:|---|---|---|---|
 | 1 | Fluxo de onboarding existe e grava perfil | PRONTO | verificado no código | feito |
-| 27 | Descobrir por que 9 sites são gerados e só 2 são publicados | falta | plano | R2 · 13/10 a 24/10 |
+| 27 | Descobrir por que 9 sites são gerados e só 2 são publicados (6 eram teste; falha sem motivo e publicação sem lista corrigidas) | PRONTO | plano | R2 · 13/10 a 24/10 |
 | 28 | Opção Enterprise: sai do fluxo normal e cai no e-mail institucional | falta | plano | R2 · 13/10 a 24/10 |
 
 ## Site builder — 3/7
