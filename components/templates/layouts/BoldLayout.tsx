@@ -271,7 +271,7 @@ export default function BoldLayout({ c, p, preview }: { c: SiteContent; p: Palet
             <div className="bd-ov" />
             <div className="bd-inner">
               <span className="bd-kicker">{Array.from({ length: firstTestimonial.rating }).map((_, s) => <Icon key={s} name="star" size={12} />)} · avaliações Google</span>
-              <blockquote>"{firstTestimonial.text}"</blockquote>
+              <blockquote>&quot;{firstTestimonial.text}&quot;</blockquote>
               <cite>{firstTestimonial.name}</cite>
             </div>
           </section>

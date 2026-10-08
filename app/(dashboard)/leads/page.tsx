@@ -3,6 +3,7 @@
 // publicado. Server component: carrega o site do tenant + leads reais
 // (RLS tenant_isolation faz o recorte). Mesmo padrão de /agendamentos.
 // ============================================================
+import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createServerClient } from '@/lib/supabase/server'
 import LeadsList, { type LeadRow } from './LeadsList'
@@ -82,7 +83,7 @@ export default async function LeadsPage() {
       {!leadsEnabled && (
         <div className="glass" style={{ padding: '.8rem 1rem', marginBottom: '1rem', fontSize: '.85rem' }}>
           A captura de leads está <b>desativada</b> no seu site. Ative na aba
-          {' '}<b>Leads</b> do <a href="/editor" style={{ color: 'inherit', textDecoration: 'underline' }}>editor</a> pra receber novos contatos.
+          {' '}<b>Leads</b> do <Link href="/editor" style={{ color: 'inherit', textDecoration: 'underline' }}>editor</Link> pra receber novos contatos.
         </div>
       )}
 

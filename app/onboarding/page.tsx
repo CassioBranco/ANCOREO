@@ -1485,7 +1485,7 @@ export default function OnboardingPage() {
                       {dominioProprio.trim() && !isValidDomain(dominioProprio) && (
                         <p className="dom-input-err">
                           <i className="ph-fill ph-warning-circle" /> Digite só o endereço, sem
-                          "https://" nem barras. Ex.: meunegocio.com.br
+                          &quot;https://&quot; nem barras. Ex.: meunegocio.com.br
                         </p>
                       )}
                       {dominioProprio.trim() && isValidDomain(dominioProprio) && (

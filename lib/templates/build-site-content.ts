@@ -10,6 +10,7 @@ import type { LayoutId } from '@/lib/templates/layouts'
 import { VISUAL_SECTION_TYPES, type SectionSnapshot } from '@/lib/editor/inline-edit'
 
 export type BuiltSite = {
+  tenantId: string
   content: SiteContent
   layout: LayoutId
   palette: PaletteColors
@@ -43,31 +44,34 @@ export async function buildSiteContent(
 ): Promise<BuiltSite | null> {
   let query = supabase
     .from('sites')
-    .select('id, niche, template, palette_index, palette, font_pair, status, domain, booking_enabled, leads_enabled')
+    .select('id, tenant_id, niche, template, palette_index, palette, font_pair, status, domain, booking_enabled, leads_enabled')
 
   query = match.siteId
     ? query.eq('id', match.siteId)
     : query.eq('domain', match.domain ?? '').eq('status', 'published')
 
   const { data: site } = await query.maybeSingle()
-  if (!site) return null
+  if (!site?.tenant_id) return null
 
   const [{ data: page }, { data: profile }, { data: images }] = await Promise.all([
     supabase
       .from('pages')
       .select('id, title, meta_description')
       .eq('site_id', site.id)
+      .eq('tenant_id', site.tenant_id)
       .eq('slug', 'home')
       .maybeSingle(),
     supabase
       .from('onboarding_profiles')
       .select('business_name, city, state, credentials, registro_profissional, years_experience, services, tone, logo_url, favicon_url, social_links, gpe_modo, gpe_link, gbp_place_id')
       .eq('site_id', site.id)
+      .eq('tenant_id', site.tenant_id)
       .maybeSingle(),
     supabase
       .from('images')
       .select('webp_url, alt_text, created_at')
       .eq('site_id', site.id)
+      .eq('tenant_id', site.tenant_id)
       .order('created_at', { ascending: false }),
   ])
 
@@ -76,6 +80,7 @@ export async function buildSiteContent(
         .from('sections')
         .select('id, section_type, content, order_index')
         .eq('page_id', page.id)
+        .eq('tenant_id', site.tenant_id)
         .order('order_index')
     : { data: [] }
 
@@ -182,6 +187,7 @@ export async function buildSiteContent(
   }
 
   return {
+    tenantId: site.tenant_id as string,
     content,
     layout: (site.template ?? 'clean') as LayoutId,
     palette: resolvePalette(site.niche ?? 'servicos', site.palette_index ?? 0, site.palette),

@@ -269,7 +269,7 @@ export default function AcolhedorLayout({ c, p, preview: _preview }: { c: SiteCo
           <section className="testi">
             <div className="narrow">
               <img className="av" src={`https://picsum.photos/seed/av-${featured.name}/120/120`} alt={featured.name} />
-              <blockquote>"{featured.text}"</blockquote>
+              <blockquote>&quot;{featured.text}&quot;</blockquote>
               <cite>{featured.name}</cite>
             </div>
           </section>

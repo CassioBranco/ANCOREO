@@ -3,6 +3,7 @@
 // Métricas (client). Anéis + "o que melhorar" = reais (/api/score/[siteId]).
 // Visitas = reais, da telemetria própria. Ranking = "em breve" (sem Search
 // Console no beta). Nada aqui é número fabricado: sem dado, mostra zero.
+import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { buildPresenceChecklist, type PresenceItem } from '@/lib/seo/local-presence'
 import type { SiteVisits } from '@/lib/analytics/queries'
@@ -391,9 +392,9 @@ export default function MetricsView({
                 <div className="stat"><div className="n">{drafts}</div><div className="l">em rascunho</div></div>
                 <div className="stat"><div className="n">{thisMonth}</div><div className="l">criados este mês</div></div>
               </div>
-              <a href="/blog" className="btn glass" style={{ marginTop: '1rem', display: 'inline-flex' }}>
+              <Link href="/blog" className="btn glass" style={{ marginTop: '1rem', display: 'inline-flex' }}>
                 <i className="ph-fill ph-pencil-simple" /> Ir pro blog
-              </a>
+              </Link>
             </div>
 
             {/* calendário de postagens (datas reais dos artigos) */}

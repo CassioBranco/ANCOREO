@@ -3,6 +3,7 @@
 // BookingWidget do site publicado. Server component: carrega o site
 // do tenant + solicitações reais (RLS tenant_isolation faz o recorte).
 // ============================================================
+import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createServerClient } from '@/lib/supabase/server'
 import AgendamentosList, { type BookingRow } from './AgendamentosList'
@@ -83,7 +84,7 @@ export default async function AgendamentosPage() {
       {!bookingEnabled && (
         <div className="glass" style={{ padding: '.8rem 1rem', marginBottom: '1rem', fontSize: '.85rem' }}>
           O widget de agendamento está <b>desativado</b> no seu site. Ative na aba
-          {' '}<b>Agenda</b> do <a href="/editor" style={{ color: 'inherit', textDecoration: 'underline' }}>editor</a> pra receber novas solicitações.
+          {' '}<b>Agenda</b> do <Link href="/editor" style={{ color: 'inherit', textDecoration: 'underline' }}>editor</Link> pra receber novas solicitações.
         </div>
       )}
 

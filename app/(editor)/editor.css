@@ -5,18 +5,22 @@
    Token-based: claro/escuro automáticos. Escopado em .painel-shell.
    ============================================================ */
 
-/* layout raiz: rail | conteúdo | palco | design — tela cheia, sem scroll no body.
-   As duas laterais não são mais espremidas num painel só: esquerda = conteúdo,
-   direita = design/ajustes, preview grande no meio. Colunas explícitas pra a
-   ordem visual não depender da ordem no DOM. */
-.painel-shell .ed{position:relative;z-index:2;height:100vh;display:grid;
-  grid-template-columns:76px 320px minmax(0,1fr) 320px;
+/* Uma ferramenta por vez: rail, painel contextual e prévia.
+   O painel oculto permanece montado para preservar texto ainda em edição. */
+.painel-shell .ed{position:relative;z-index:2;height:100vh;height:100dvh;display:grid;
+  grid-template-columns:84px 320px minmax(0,1fr);
   grid-template-rows:auto minmax(0,1fr);overflow:hidden}
-.painel-shell .ed-score{grid-column:1 / -1;grid-row:1}
+.painel-shell .ed [hidden]{display:none!important}
+.painel-shell .ed-score-slot{grid-column:1 / -1;grid-row:1}
 .painel-shell .ed-rail{grid-column:1;grid-row:2}
-.painel-shell .ed-panel-l{grid-column:2;grid-row:2}
-.painel-shell .ed-stage{grid-column:3;grid-row:2}
-.painel-shell .ed-panel-r{grid-column:4;grid-row:2}
+.painel-shell .ed-panel-l,.painel-shell .ed-panel-r{grid-column:2;grid-row:2}
+.painel-shell .ed-stage{grid-column:3;grid-row:2;min-height:0}
+.painel-shell .ed--preview{grid-template-columns:84px minmax(0,1fr)}
+.painel-shell .ed--preview .ed-stage{grid-column:2}
+.painel-shell .ed button:focus-visible,.painel-shell .ed a:focus-visible{
+  outline:2px solid var(--navy);outline-offset:3px}
+.painel-shell .ed-rail .ed-tab{min-height:56px}
+.painel-shell .ed-toolbar .ed-icon-btn{min-width:40px;min-height:40px}
 
 /* ── Barra de score SEO/GEO/AEO (topo — âncora do produto) ── */
 .painel-shell .ed-score{position:relative;display:flex;align-items:center;gap:.9rem;
@@ -107,6 +111,27 @@
 .painel-shell .ed-tab i{font-size:18px;line-height:1}
 .painel-shell .ed-tab:hover{background:hsl(var(--muted) / .6);color:var(--ink)}
 .painel-shell .ed-tab.on{background:hsl(var(--accent) / .1);color:var(--ink);box-shadow:inset 0 0 0 1px hsl(var(--accent) / .4)}
+
+/* Aba clicada enquanto o painel novo ainda monta. O sinal tem que sair no
+   clique e não quando a tela já trocou, senão o editor parece que ignorou. */
+.painel-shell .ed-tab.pendente{background:hsl(var(--muted) / .6);color:var(--ink)}
+.painel-shell .ed-tab-spin{width:11px;height:11px;border-radius:50%;
+  border:2px solid hsl(var(--muted-foreground) / .35);border-top-color:var(--accent);
+  animation:ed-tab-gira .7s linear infinite}
+@keyframes ed-tab-gira{to{transform:rotate(360deg)}}
+
+/* O painel oculto fica montado (pra não perder texto em edição), então ele
+   reaparece via display. Trocar display reinicia a animação: é o gancho de
+   graça pro fade de troca de aba. 160ms, o olho lê "mudou" sem esperar. */
+.painel-shell .ed-panel-l,
+.painel-shell .ed-panel-r{animation:ed-painel-entra .16s cubic-bezier(.22,1,.36,1) both}
+@keyframes ed-painel-entra{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+
+@media(prefers-reduced-motion:reduce){
+  .painel-shell .ed-tab-spin{animation:none}
+  .painel-shell .ed-panel-l,
+  .painel-shell .ed-panel-r{animation:none}
+}
 .painel-shell .ed-rail .foot{margin-top:auto;display:flex;flex-direction:column;gap:.4rem;align-items:center}
 
 /* ── Painéis de controle (esquerda = conteúdo, direita = design) ── */
@@ -182,7 +207,22 @@
   padding:.7rem .9rem;background:none;border:0;color:var(--ink);font-size:.8rem;font-weight:700;
   font-family:var(--font-heading),'Plus Jakarta Sans';cursor:pointer}
 .painel-shell .ed-acc-h:hover{background:hsl(var(--muted) / .5)}
-.painel-shell .ed-acc-b{border-top:1px solid var(--line);padding:.85rem;display:flex;flex-direction:column;gap:.7rem}
+/* min-height reserva o espaço do editor de seção enquanto ele carrega, para o
+   corpo não abrir com 45px de "Carregando…" e saltar pra 1000px de uma vez.
+   O [hidden] precisa vir depois do display:flex, senão o flex ganha e a seção
+   fechada continua ocupando a tela. */
+.painel-shell .ed-acc-b{border-top:1px solid var(--line);padding:.85rem;display:flex;flex-direction:column;gap:.7rem;min-height:180px}
+.painel-shell .ed-acc-b[hidden]{display:none}
+
+/* esqueleto do carregamento: três barras cinzas pulsando, do tamanho dos
+   campos que vão nascer no lugar delas */
+.painel-shell .ed-skel{display:flex;flex-direction:column;gap:.7rem;flex:1}
+.painel-shell .ed-skel i{display:block;border-radius:9px;background:hsl(var(--muted-foreground) / .18);animation:ed-skel-pulso 1.1s ease-in-out infinite}
+.painel-shell .ed-skel i:nth-child(1){height:34px}
+.painel-shell .ed-skel i:nth-child(2){height:64px}
+.painel-shell .ed-skel i:nth-child(3){height:34px;width:60%}
+@keyframes ed-skel-pulso{0%,100%{opacity:.45}50%{opacity:.9}}
+@media(prefers-reduced-motion:reduce){.painel-shell .ed-skel i{animation:none}}
 .painel-shell .ed-field-group{display:flex;flex-direction:column;gap:.35rem}
 
 /* lista (blog / regras) */
@@ -294,14 +334,21 @@
 .painel-shell .ed-gal-btn.on{background:var(--navy);border-color:var(--navy);color:hsl(var(--primary-foreground))}
 .painel-shell .ed-gal-alt{font-size:.6rem;line-height:1.3;color:var(--muted2);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 
-@media(max-width:1280px){
-  .painel-shell .ed{grid-template-columns:64px 280px minmax(0,1fr) 280px}
+@media(max-width:1100px){
+  .painel-shell .ed{grid-template-columns:72px 280px minmax(0,1fr)}
+  .painel-shell .ed--preview{grid-template-columns:72px minmax(0,1fr)}
+  .painel-shell .ed-toolbar{flex-wrap:wrap;padding:.5rem;gap:.4rem}
+  .painel-shell .ed-url{display:none}
 }
-/* telas estreitas: some com a lateral direita (design) pra o preview respirar;
-   mantém rail + conteúdo + preview. Base funcional — refinar depois. */
-@media(max-width:1024px){
-  .painel-shell .ed{grid-template-columns:60px 280px minmax(0,1fr)}
-  .painel-shell .ed-panel-r{display:none}
+@media(max-width:700px){
+  .painel-shell .ed{grid-template-columns:68px minmax(0,1fr)}
+  .painel-shell .ed-stage{grid-column:2}
+  .painel-shell .ed:not(.ed--preview) .ed-stage{visibility:hidden;pointer-events:none}
+  .painel-shell .ed-panel{position:relative;z-index:3;min-width:0}
+  .painel-shell .ed--preview{grid-template-columns:68px minmax(0,1fr)}
+  .painel-shell .ed-canvas{padding:.5rem}
+  .painel-shell .ed-score-dims{flex-wrap:wrap}
+  .painel-shell .ed-score{flex-wrap:wrap;max-height:35dvh;overflow:auto}
 }
 
 /* easing suave nos controles do editor */
@@ -310,3 +357,7 @@
 .painel-shell .ed-acc,
 .painel-shell .ed-gal-card,
 .painel-shell .ed-img{transition-timing-function:cubic-bezier(.22,1,.36,1)}
+
+/* Fieldset agrupa o estado de gravação sem alterar o layout do painel. */
+.painel-shell .ed-settings-fields{border:0;margin:0;min-width:0}
+.painel-shell .ed-settings-fields:disabled{opacity:.7}

@@ -15,17 +15,16 @@
 14;GBP;Ponte blog ↔ Perfil: artigo publicado vira post, post vira pauta;PRONTO;verificado no código;feito
 15;Fora do MVP;Loja: botão de compra ligado ao checkout;FALTA;verificado no código;depois do lançamento
 16;Fora do MVP;Loja: painel de produtos existe;FALTA;verificado no código;depois do lançamento
-17;Google Perfil;Você criar a senha do robô semanal no Vercel (CRON_SECRET);ESPERANDO VOCÊ;plano;agora
-18;Google Perfil;Você confirmar se a chave de e-mail (RESEND) já está no Vercel;ESPERANDO VOCÊ;plano;agora
-19;Google Perfil;Sessão de teste T5: publicar um post no seu Perfil de verdade, 20 min;ESPERANDO VOCÊ;plano;agora
-20;Métricas;Contar visitas de robô de IA no site do cliente (medição real, custo zero);FALTA;plano;S2 · 16 a 23/08
-21;Métricas;Posição real das palavras-chave, puxada do Search Console;FALTA;plano;S2 · 16 a 23/08
-22;Site builder;Tela de domínio próprio no painel (hoje o cliente não tem onde apontar o DNS);FALTA;plano;S2 · 16 a 23/08
-23;Site builder;Bloco de resposta direta abaixo do título: o trecho que a IA copia ao citar;FALTA;plano;S2 · 16 a 23/08
-24;Site builder;"Content-Signal: separar ""pode me citar"" de ""pode me usar pra treinar""";FALTA;plano;S3 · 24 a 31/08
-25;Site builder;Site lento não publica (trava acima de 2,5 segundos);FALTA;plano;S3 · 24 a 31/08
-26;Site builder;Avisar quando uma página fica a mais de 3 cliques da home;FALTA;plano;S3 · 24 a 31/08
-27;Onboarding;Descobrir por que 8 sites são gerados e só 1 é publicado;FALTA;plano;S3 · 24 a 31/08
-28;Onboarding;Opção Enterprise: sai do fluxo normal e cai no e-mail institucional;FALTA;plano;S2 · 16 a 23/08
-29;Blog builder;Publicar 5 posts de verdade e conferir os links entre eles;FALTA;plano;S3 · 24 a 31/08
-30;Fora do MVP;Cobrança da assinatura (o beta é grátis, então não corre);FORA DO MVP;plano;depois do lançamento
+17;Google Perfil;Você rodar o teste seco do robô (?seco=1) com o CRON_SECRET na mão;ESPERANDO VOCÊ;plano;agora
+18;Google Perfil;Sessão de teste T5: publicar um post no seu Perfil de verdade, 20 min;ESPERANDO VOCÊ;plano;agora
+19;Métricas;Contar visitas de robô de IA no site do cliente (medição real, custo zero);FALTA;plano;S2 · 16 a 23/08
+20;Métricas;Posição real das palavras-chave, puxada do Search Console;FALTA;plano;S2 · 16 a 23/08
+21;Site builder;Tela de domínio próprio no painel (hoje o cliente não tem onde apontar o DNS);FALTA;plano;S2 · 16 a 23/08
+22;Site builder;Bloco de resposta direta abaixo do título: o trecho que a IA copia ao citar;FALTA;plano;S2 · 16 a 23/08
+23;Site builder;"Content-Signal: separar ""pode me citar"" de ""pode me usar pra treinar""";FALTA;plano;S3 · 24 a 31/08
+24;Site builder;Site lento não publica (trava acima de 2,5 segundos);FALTA;plano;S3 · 24 a 31/08
+25;Site builder;Avisar quando uma página fica a mais de 3 cliques da home;FALTA;plano;S3 · 24 a 31/08
+26;Onboarding;Descobrir por que 8 sites são gerados e só 1 é publicado;FALTA;plano;S3 · 24 a 31/08
+27;Onboarding;Opção Enterprise: sai do fluxo normal e cai no e-mail institucional;FALTA;plano;S2 · 16 a 23/08
+28;Blog builder;Publicar 5 posts de verdade e conferir os links entre eles;FALTA;plano;S3 · 24 a 31/08
+29;Fora do MVP;Cobrança da assinatura (o beta é grátis, então não corre);FORA DO MVP;plano;depois do lançamento

@@ -402,7 +402,7 @@ export default function AcademiaLayout({ c, p, preview }: { c: SiteContent; p: P
             <div className="ac-wrap">
               <span className="ac-kicker" style={{ color: 'var(--sa)' }}>Quem estudou, fala</span>
               <blockquote>
-                "{bestTestimonial.text.split(' ').slice(0, 6).join(' ')} <span className="ac-mark">{bestTestimonial.text.split(' ').slice(6, 10).join(' ')}</span> {bestTestimonial.text.split(' ').slice(10).join(' ')}"
+                &quot;{bestTestimonial.text.split(' ').slice(0, 6).join(' ')} <span className="ac-mark">{bestTestimonial.text.split(' ').slice(6, 10).join(' ')}</span> {bestTestimonial.text.split(' ').slice(10).join(' ')}&quot;
               </blockquote>
               <cite>{bestTestimonial.name} · aluno</cite>
             </div>

@@ -57,7 +57,18 @@ export type UndoToast = { label: string; undo?: () => void }
 const isVisual = (t: string) => (VISUAL_SECTION_TYPES as readonly string[]).includes(t)
 const isHidden = (r: SectionRow) => Boolean(r.content['_hidden'])
 
-export function useEditBridge(siteId: string, niche: string, onStructural: () => void) {
+/**
+ * @param pageIdSeed  Id da home que o page.tsx já buscou (useHomeSections).
+ *                    `null` = ainda carregando, a ponte espera em vez de fazer
+ *                    a mesma consulta de novo. `undefined` = sem semente, a
+ *                    ponte busca sozinha (comportamento antigo).
+ */
+export function useEditBridge(
+  siteId: string,
+  niche: string,
+  onStructural: () => void,
+  pageIdSeed?: string | null,
+) {
   const [saveState, setSaveState] = useState<InlineSaveState>('idle')
   const [toast, setToast] = useState<UndoToast | null>(null)
 
@@ -117,8 +128,12 @@ export function useEditBridge(siteId: string, niche: string, onStructural: () =>
   }, [])
 
   useEffect(() => {
+    // Espera a home chegar do pai: assim a ponte pula a consulta a `pages` e
+    // vai direto nas seções (uma ida ao servidor a menos na abertura).
+    if (pageIdSeed === null) return
+    if (pageIdSeed) pageIdRef.current = pageIdSeed
     void loadRows().then(() => { if (readyRef.current) postInit() })
-  }, [loadRows, postInit])
+  }, [loadRows, postInit, pageIdSeed])
 
   // ── persistência de texto (mesmo caminho do SectionEditor) ──
   const persistType = useCallback(async (sectionType: string) => {

@@ -84,8 +84,11 @@ const SPRINTS = {
 
 const FILA = [
   // Portões humanos primeiro: é o que trava tudo o mais.
-  { pilar: 'Google Perfil', oQue: 'Você criar a senha do robô semanal no Vercel (CRON_SECRET)', situacao: 'ESPERANDO VOCÊ', quando: SPRINTS.agora },
-  { pilar: 'Google Perfil', oQue: 'Você confirmar se a chave de e-mail (RESEND) já está no Vercel', situacao: 'ESPERANDO VOCÊ', quando: SPRINTS.agora },
+  // CRON_SECRET e RESEND_API_KEY entraram no Vercel em 13/08 e já subiram num
+  // build (c1fa034). O que sobrou é o teste seco: a rota exige o Bearer com o
+  // segredo, e o valor é só do Cássio — eu não leio segredo, então quem prova
+  // que o robô responde 200 é ele.
+  { pilar: 'Google Perfil', oQue: 'Você rodar o teste seco do robô (?seco=1) com o CRON_SECRET na mão', situacao: 'ESPERANDO VOCÊ', quando: SPRINTS.agora },
   { pilar: 'Google Perfil', oQue: 'Sessão de teste T5: publicar um post no seu Perfil de verdade, 20 min', situacao: 'ESPERANDO VOCÊ', quando: SPRINTS.agora },
 
   { pilar: 'Métricas', oQue: 'Contar visitas de robô de IA no site do cliente (medição real, custo zero)', situacao: 'FALTA', quando: SPRINTS.S2 },

@@ -9,6 +9,7 @@
 // ao browser (isto roda só no servidor).
 
 import { createAdminClient } from '@/lib/supabase/admin'
+import { publishedSite } from '@/lib/sites/published'
 import type { ProductWithImages, Collection } from '@/lib/ecommerce/types'
 
 const PRODUCT_SELECT =
@@ -21,28 +22,17 @@ function sortImages(p: ProductWithImages): ProductWithImages {
   return { ...p, images: (p.images ?? []).slice().sort((a, b) => a.position - b.position) }
 }
 
-// site_id de um domínio publicado (ou null se não existe/não publicado).
-export async function publishedSiteId(domain: string): Promise<string | null> {
-  const admin = createAdminClient()
-  const { data } = await admin
-    .from('sites')
-    .select('id')
-    .eq('domain', domain)
-    .eq('status', 'published')
-    .maybeSingle()
-  return (data as { id: string } | null)?.id ?? null
-}
-
 // Catálogo: todos os produtos publicados de uma loja (por domínio).
 export async function getPublishedProductsByDomain(domain: string): Promise<ProductWithImages[]> {
-  const siteId = await publishedSiteId(domain)
-  if (!siteId) return []
+  const site = await publishedSite(domain)
+  if (!site) return []
 
   const admin = createAdminClient()
   const { data } = await admin
     .from('products')
     .select(PRODUCT_SELECT)
-    .eq('site_id', siteId)
+    .eq('site_id', site.id)
+    .eq('tenant_id', site.tenant_id)
     .eq('status', 'published')
     .order('created_at', { ascending: false })
 
@@ -54,14 +44,15 @@ export async function getPublishedProductBySlug(
   domain: string,
   slug: string,
 ): Promise<ProductWithImages | null> {
-  const siteId = await publishedSiteId(domain)
-  if (!siteId) return null
+  const site = await publishedSite(domain)
+  if (!site) return null
 
   const admin = createAdminClient()
   const { data } = await admin
     .from('products')
     .select(PRODUCT_SELECT)
-    .eq('site_id', siteId)
+    .eq('site_id', site.id)
+    .eq('tenant_id', site.tenant_id)
     .eq('slug', slug)
     .eq('status', 'published')
     .maybeSingle()
@@ -72,14 +63,15 @@ export async function getPublishedProductBySlug(
 
 // Coleções publicadas de uma loja (para agrupar a vitrine).
 export async function getCollectionsByDomain(domain: string): Promise<Collection[]> {
-  const siteId = await publishedSiteId(domain)
-  if (!siteId) return []
+  const site = await publishedSite(domain)
+  if (!site) return []
 
   const admin = createAdminClient()
   const { data } = await admin
     .from('collections')
     .select('id, tenant_id, site_id, name, slug, description, position, created_at')
-    .eq('site_id', siteId)
+    .eq('site_id', site.id)
+    .eq('tenant_id', site.tenant_id)
     .order('position', { ascending: true })
 
   return (data ?? []) as Collection[]
@@ -87,13 +79,14 @@ export async function getCollectionsByDomain(domain: string): Promise<Collection
 
 // Modo da loja (checkout vs catálogo) do site publicado, lido do onboarding.
 export async function getLojaModo(domain: string): Promise<'checkout' | 'catalogo'> {
-  const siteId = await publishedSiteId(domain)
-  if (!siteId) return 'catalogo'
+  const site = await publishedSite(domain)
+  if (!site) return 'catalogo'
   const admin = createAdminClient()
   const { data } = await admin
     .from('onboarding_profiles')
     .select('loja_modo')
-    .eq('site_id', siteId)
+    .eq('site_id', site.id)
+    .eq('tenant_id', site.tenant_id)
     .maybeSingle()
   return (data as { loja_modo?: string } | null)?.loja_modo === 'checkout' ? 'checkout' : 'catalogo'
 }

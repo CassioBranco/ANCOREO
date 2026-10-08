@@ -1,14 +1,20 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { createBrowserClient } from '@/lib/supabase/client'
 import { EVT_INLINE_CONTENT, EVT_PANEL_SAVED } from '@/lib/editor/inline-edit'
 
 type Props = {
   siteId: string
+  /** Id da home, já carregado pelo pai (useHomeSections). */
+  pageId: string | null
   sectionType: string
   niche: string
+  /** Conteúdo desta seção, vindo do carregamento único do pai. */
+  initialContent: SectionContent | null | undefined
   onSaved: () => void
+  /** Espelha no cache do pai o que foi salvo aqui. */
+  onContentChange?: (sectionType: string, content: SectionContent) => void
 }
 
 type SectionContent = Record<string, unknown>
@@ -35,59 +41,30 @@ type FaqItem = { question: string; answer: string }
 
 type ServiceItem = { name: string; description: string; icon?: string }
 
-export default function SectionEditor({ siteId, sectionType, niche, onSaved }: Props) {
-  const [content, setContent] = useState<SectionContent | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [loadErr, setLoadErr] = useState(false)
+export default function SectionEditor({
+  siteId, pageId, sectionType, niche, initialContent, onSaved, onContentChange,
+}: Props) {
+  const [content, setContent] = useState<SectionContent | null>(
+    initialContent ? unwrapMalformed(sectionType, initialContent) : null,
+  )
   const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState('')
   const [aiLoading, setAiLoading] = useState(false)
   const [aiMode, setAiMode] = useState<'block' | 'page' | null>(null)
-  const [pageId, setPageId] = useState<string | null>(null)
   // Geração de descrição por item (serviços/produtos): índice em andamento e índice com erro
   const [genIdx, setGenIdx] = useState<number | null>(null)
   const [genErrIdx, setGenErrIdx] = useState<number | null>(null)
 
+  // O componente fica montado o tempo todo (o acordeão só esconde), então o
+  // que o dono digitou e ainda não salvou sobrevive a fechar e reabrir. Só
+  // aceitamos conteúdo novo do pai quando ele REALMENTE muda de objeto — o
+  // caso do "Preencher tudo com IA", que reescreve tudo por fora.
+  const ultimoDoPai = useRef(initialContent)
   useEffect(() => {
-    let alive = true
-    // try/catch/finally: se QUALQUER query rejeitar (rede, auth), o finally
-    // ainda tira o loading e mostramos um erro acionável — nunca "loading eterno".
-    async function load() {
-      try {
-        const supabase = createBrowserClient()
-        const { data: page } = await supabase
-          .from('pages')
-          .select('id')
-          .eq('site_id', siteId)
-          .eq('slug', 'home')
-          .single()
-
-        if (!alive) return
-        if (!page?.id) return
-        setPageId(page.id)
-
-        // .limit(1) em vez de .single(): a seção pode ter sido duplicada no
-        // editor visual (linhas do mesmo tipo compartilham o conteúdo).
-        const { data: sectionRows } = await supabase
-          .from('sections')
-          .select('content')
-          .eq('page_id', page.id)
-          .eq('section_type', sectionType)
-          .order('order_index')
-          .limit(1)
-
-        if (!alive) return
-        const section = sectionRows?.[0]
-        if (section?.content) setContent(unwrapMalformed(sectionType, section.content as SectionContent))
-      } catch (e) {
-        console.error('[SectionEditor] falha ao carregar a seção', e)
-        if (alive) setLoadErr(true)
-      } finally {
-        if (alive) setLoading(false)
-      }
-    }
-    load()
-    return () => { alive = false }
-  }, [siteId, sectionType])
+    if (initialContent === ultimoDoPai.current) return
+    ultimoDoPai.current = initialContent
+    setContent(initialContent ? unwrapMalformed(sectionType, initialContent) : null)
+  }, [initialContent, sectionType])
 
   // Edição inline no preview → espelha aqui (aba Textos) sem reload.
   useEffect(() => {
@@ -100,18 +77,26 @@ export default function SectionEditor({ siteId, sectionType, niche, onSaved }: P
   }, [sectionType])
 
   async function save(updated: SectionContent) {
-    if (!pageId) return
+    if (!pageId) { setSaveError('A página ainda não foi carregada. Tente novamente.'); return }
     setSaving(true)
-    const supabase = createBrowserClient()
-    await supabase
-      .from('sections')
-      .update({ content: updated })
-      .eq('page_id', pageId)
-      .eq('section_type', sectionType)
-    setSaving(false)
-    // avisa a ponte de edição: o preview espelha o texto novo sem reload
-    window.dispatchEvent(new CustomEvent(EVT_PANEL_SAVED, { detail: { sectionType, content: updated } }))
-    onSaved()
+    setSaveError('')
+    try {
+      const supabase = createBrowserClient()
+      const { data, error } = await supabase
+        .from('sections')
+        .update({ content: updated })
+        .eq('page_id', pageId)
+        .eq('section_type', sectionType)
+        .select('id')
+      if (error || !data?.length) throw new Error('Conteúdo não salvo. Tente novamente.')
+      onContentChange?.(sectionType, updated)
+      window.dispatchEvent(new CustomEvent(EVT_PANEL_SAVED, { detail: { sectionType, content: updated } }))
+      onSaved()
+    } catch {
+      setSaveError('Conteúdo não salvo. Seu texto continua aqui; tente salvar novamente.')
+    } finally {
+      setSaving(false)
+    }
   }
 
   async function rewriteWithAI(scope: 'block' | 'page') {
@@ -136,24 +121,6 @@ export default function SectionEditor({ siteId, sectionType, niche, onSaved }: P
       setAiLoading(false)
       setAiMode(null)
     }
-  }
-
-  if (loading) {
-    return <p className="ed-saving">Carregando…</p>
-  }
-
-  if (loadErr && !content) {
-    return (
-      <>
-        <p className="ed-err">Não consegui carregar esta seção.</p>
-        <button
-          onClick={() => { setLoadErr(false); setLoading(true); location.reload() }}
-          className="btn glass sm"
-        >
-          Recarregar
-        </button>
-      </>
-    )
   }
 
   if (!content) {
@@ -260,6 +227,7 @@ export default function SectionEditor({ siteId, sectionType, niche, onSaved }: P
 
   return (
     <>
+      {saveError && <p className="ed-err" role="alert">{saveError}</p>}
       {isFaq && (
         <>
           <p className="ed-hint" style={{ marginTop: 0 }}>
@@ -328,7 +296,7 @@ export default function SectionEditor({ siteId, sectionType, niche, onSaved }: P
         <>
           <p className="ed-hint" style={{ marginTop: 0 }}>
             Itens da seção de serviços/produtos do site. Digite algumas
-            palavras-chave na descrição (ou só o nome) e use "Gerar com IA".
+            palavras-chave na descrição (ou só o nome) e use &quot;Gerar com IA&quot;.
           </p>
           {svcItems.map((item, i) => (
             <div

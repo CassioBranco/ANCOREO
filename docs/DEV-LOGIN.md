@@ -8,7 +8,7 @@ toda vez. Loga um usuário de teste direto, sem senha.
 1. Sobe o dev server:
 
    ```bash
-   cd "C:/Users/cassio/Documents/ancoreo" && npm run dev
+   cd "D:/ancoreo" && npm run dev
    ```
 
 2. Abre no navegador:

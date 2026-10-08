@@ -144,7 +144,7 @@ Cada projeto tem sua própria pasta e sua própria memória. Eles não se mistur
 
 | projeto | onde | memória |
 |---|---|---|
-| **ANCOREO** | `Documents\ancoreo` | própria, no projeto |
+| **ANCOREO** | `D:\ancoreo` | própria, no projeto |
 | **Blog Dove e clientes** | `Desktop\Marketing GERAL\claude` | o "porão", `MEMORY.md` |
 | **SUORT** | pasta do site | contexto em `dove-clients\` |
 

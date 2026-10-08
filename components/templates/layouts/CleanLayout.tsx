@@ -352,7 +352,7 @@ export default function CleanLayout({ c, p, preview }: { c: SiteContent; p: Pale
             {testimonials.map((t, i) => (
               <div className="cl-testi" key={i}>
                 <div className="cl-stars">{Array.from({ length: t.rating }).map((_, s) => <Icon key={s} name="star" size={14} />)}</div>
-                <p>"{t.text}"</p>
+                <p>&quot;{t.text}&quot;</p>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '.6rem', marginTop: '.5rem' }}>
                   {t.photoUrl && (
                     // eslint-disable-next-line @next/next/no-img-element

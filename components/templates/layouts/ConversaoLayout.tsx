@@ -342,7 +342,7 @@ export default function ConversaoLayout({ c, p, preview: _preview }: { c: SiteCo
                 {testimonials.slice(0, 3).map((t, i) => (
                   <div className="review" key={i}>
                     <div className="stars">{Array.from({ length: t.rating ?? 5 }).map((_, s) => <Icon key={s} name="star" size={14} />)}</div>
-                    <p>"{t.text}"</p>
+                    <p>&quot;{t.text}&quot;</p>
                     <div className="who"><span className="chk"><Icon name="check" size={14} /></span> {t.name}</div>
                   </div>
                 ))}

@@ -280,3 +280,13 @@
   .ob-page .auth-lbl br{display:none}
   .ob-page .opt .seo{display:none}
 }
+
+/* Esqueleto da rota (loading.tsx). Primeira tela de quem acabou de criar
+   conta: tem que aparecer no clique, não quando o servidor responder. */
+.ob-page .ob-skel-wrap{display:flex;flex-direction:column;
+  padding:clamp(1.4rem,5vw,3.4rem);max-width:640px;margin-inline:auto}
+.ob-page .ob-skel{display:block;border-radius:12px;background:hsl(var(--muted-foreground) / .14);
+  animation:ob-skel-pulsa 1.1s ease-in-out infinite}
+.ob-page .ob-skel-txt{margin-top:22px;color:var(--soft);font-size:.85rem}
+@keyframes ob-skel-pulsa{0%,100%{opacity:.5}50%{opacity:1}}
+@media(prefers-reduced-motion:reduce){.ob-page .ob-skel{animation:none}}

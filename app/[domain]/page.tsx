@@ -90,17 +90,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const supabase = createAdminClient()
   const { data: site } = await supabase
     .from('sites')
-    .select('id, niche, status')
+    .select('id, tenant_id, niche, status')
     .eq('domain', domain)
     .eq('status', 'published')
     .maybeSingle()
 
-  if (!site) return { title: domain }
+  if (!site?.tenant_id) return { title: domain }
 
   const { data: page } = await supabase
     .from('pages')
     .select('title, meta_description')
     .eq('site_id', site.id)
+    .eq('tenant_id', site.tenant_id)
     .eq('slug', 'home')
     .single()
 
@@ -109,6 +110,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .from('onboarding_profiles')
     .select('favicon_url')
     .eq('site_id', site.id)
+    .eq('tenant_id', site.tenant_id)
     .maybeSingle()
   const favicon = (prof as { favicon_url?: string } | null)?.favicon_url
 

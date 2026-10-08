@@ -187,7 +187,7 @@ export default function JovemLayout({ c, p, preview }: { c: SiteContent; p: Pale
           <div style={wrap}>
             <div style={{ marginBottom: '2.8rem' }}>
               <span style={{ ...mono, fontSize: '.72rem', fontWeight: 700, letterSpacing: '.15em', textTransform: 'uppercase', color: 'var(--sp)' }}>
-                // O que fazemos
+                {'// '}O que fazemos
               </span>
               <h2 style={{ ...smash, fontSize: 'clamp(2.2rem, 6vw, 4.5rem)', margin: '.6rem 0 .5rem' }}>
                 Serviços &amp; estilos
@@ -234,7 +234,7 @@ export default function JovemLayout({ c, p, preview }: { c: SiteContent; p: Pale
             <div style={wrap}>
               <div style={{ marginBottom: '2.8rem' }}>
                 <span style={{ ...mono, fontSize: '.72rem', fontWeight: 700, letterSpacing: '.15em', textTransform: 'uppercase', color: 'var(--sa)' }}>
-                  // Quem segura o trampo
+                  {'// '}Quem segura o trampo
                 </span>
                 <h2 style={{ ...smash, fontSize: 'clamp(2.2rem, 6vw, 4.5rem)', margin: '.6rem 0 .5rem', color: 'var(--paper)' }}>
                   A equipe
@@ -275,7 +275,7 @@ export default function JovemLayout({ c, p, preview }: { c: SiteContent; p: Pale
           <div style={wrap}>
             <div style={{ marginBottom: '2.8rem', textAlign: 'center' }}>
               <span style={{ ...mono, fontSize: '.72rem', fontWeight: 700, letterSpacing: '.15em', textTransform: 'uppercase', color: 'var(--sp)' }}>
-                // Sem mistério
+                {'// '}Sem mistério
               </span>
               <h2 style={{ ...smash, fontSize: 'clamp(2.2rem, 6vw, 4.5rem)', margin: '.6rem 0 .5rem' }}>
                 Como funciona
@@ -306,7 +306,7 @@ export default function JovemLayout({ c, p, preview }: { c: SiteContent; p: Pale
           <section style={{ padding: '5.5rem 0', backgroundColor: 'var(--ink)', color: 'var(--paper)', textAlign: 'center' }}>
             <div style={wrap}>
               <span style={{ ...mono, fontSize: '.72rem', fontWeight: 700, letterSpacing: '.15em', textTransform: 'uppercase', color: 'var(--sa)' }}>
-                // {c.testimonials.length}+ avaliações positivas
+                {'// '}{c.testimonials.length}+ avaliações positivas
               </span>
               <blockquote style={{
                 ...smash, fontSize: 'clamp(1.8rem, 5vw, 3.6rem)', lineHeight: .95,
@@ -338,7 +338,7 @@ export default function JovemLayout({ c, p, preview }: { c: SiteContent; p: Pale
             </div>
             <div>
               <span style={{ ...mono, fontSize: '.72rem', fontWeight: 700, letterSpacing: '.15em', textTransform: 'uppercase', color: 'var(--sp)' }}>
-                // Sobre nós
+                {'// '}Sobre nós
               </span>
               <h2 style={{ ...smash, fontSize: 'clamp(2rem, 4vw, 3.5rem)', margin: '.6rem 0 1rem' }}>
                 {c.businessName}
@@ -379,7 +379,7 @@ export default function JovemLayout({ c, p, preview }: { c: SiteContent; p: Pale
         <section style={{ padding: '5.5rem 0', backgroundColor: 'var(--ink)', color: 'var(--paper)', textAlign: 'center', position: 'relative' }}>
           <div style={wrap}>
             <span style={{ ...mono, fontSize: '.72rem', fontWeight: 700, letterSpacing: '.15em', textTransform: 'uppercase', color: 'var(--sa)' }}>
-              // Bora?
+              {'// '}Bora?
             </span>
             <h2 style={{ ...smash, fontSize: 'clamp(2.6rem, 8vw, 6rem)', lineHeight: .85, letterSpacing: '-0.03em', margin: '.6rem 0 1.4rem', color: 'var(--paper)' }}>
               Fala com a <span style={{ WebkitTextStroke: '2.5px var(--paper)', color: 'transparent' }}>gente</span>

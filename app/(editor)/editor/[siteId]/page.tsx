@@ -1,12 +1,17 @@
 'use client'
 
-import { useState, useEffect, useRef, useTransition } from 'react'
-import { useParams } from 'next/navigation'
+import Link from 'next/link'
+import { useState, useEffect, useRef, useTransition, useCallback, Suspense } from 'react'
+import { useParams, useSearchParams } from 'next/navigation'
 import { createBrowserClient } from '@/lib/supabase/client'
 import EditorSidebar from './components/EditorSidebar'
 import CustomizationPanel from './components/panels/CustomizationPanel'
 import ScoreBar from './components/ScoreBar'
 import { useEditBridge } from './components/useEditBridge'
+import { useHomeSections } from './components/useHomeSections'
+import { readSiteGeneration } from '@/lib/editor/generation-stream'
+import type { EditorPanel } from './components/EditorSidebar'
+import EditorSkeleton from './loading'
 
 export type ViewMode = 'desktop' | 'mobile'
 
@@ -42,8 +47,41 @@ const LARGURA_DESKTOP = 1280
 const ALTURA_PHONE = 768
 const PADDING_PALCO = 21 // 1.3rem do .ed-canvas
 
-export default function EditorPage() {
+// Abas válidas do editor. Serve de filtro pro que vem na URL: se alguém
+// digitar ?painel=qualquer-coisa, cai em 'content' em vez de quebrar a tela.
+const PAINEIS: EditorPanel[] = ['content', 'design', 'preview']
+
+function lerPainel(valor: string | null): EditorPanel {
+  return PAINEIS.includes(valor as EditorPanel) ? (valor as EditorPanel) : 'content'
+}
+
+function EditorPageInner() {
   const { siteId } = useParams<{ siteId: string }>()
+  // A aba ativa mora na URL (?painel=design), não só na memória do React.
+  // Com isso o F5 volta na mesma aba, o link que a pessoa manda pro sócio
+  // abre onde ela estava, e o editor deixa de parecer que "perdeu o lugar".
+  // Gravamos com history.replaceState e não com router.replace porque o
+  // layout do editor faz checagem de sessão no servidor: router.replace
+  // mandaria uma ida ao Supabase a cada clique de aba, à toa.
+  const searchParams = useSearchParams()
+  const [activePanel, definirPainel] = useState<EditorPanel>(() => lerPainel(searchParams.get('painel')))
+  const [painelPendente, setPainelPendente] = useState<EditorPanel | null>(null)
+  const [trocandoPainel, iniciarTrocaPainel] = useTransition()
+
+  const setActivePanel = useCallback((painel: EditorPanel) => {
+    setPainelPendente(painel)
+    // useTransition: enquanto o painel novo monta, o antigo continua na tela
+    // e clicável, em vez de congelar tudo num frame branco.
+    iniciarTrocaPainel(() => definirPainel(painel))
+    const q = new URLSearchParams(window.location.search)
+    if (painel === 'content') q.delete('painel')
+    else q.set('painel', painel)
+    const qs = q.toString()
+    window.history.replaceState(null, '', qs ? `${window.location.pathname}?${qs}` : window.location.pathname)
+  }, [])
+
+  useEffect(() => { if (!trocandoPainel) setPainelPendente(null) }, [trocandoPainel])
+  const [showScore, setShowScore] = useState(false)
   const [viewMode, setViewMode] = useState<ViewMode>('desktop')
   const [site, setSite] = useState<SiteData | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -111,6 +149,10 @@ export default function EditorPage() {
       })
   }, [siteId])
 
+  // Home + conteúdo das 4 seções numa requisição só, no load do editor.
+  // O painel de Textos consome isto por prop — nenhum acordeão busca sozinho.
+  const secoes = useHomeSections(siteId)
+
   function refreshPreview() {
     startTransition(() => setPreviewKey(k => k + 1))
   }
@@ -118,7 +160,7 @@ export default function EditorPage() {
   // Ponte de edição inline com o iframe do preview (Fases 1 e 2 do editor
   // visual): texto direto no preview + toolbar de seção + drag-n-drop de
   // imagem/seção. O niche alimenta o alt text do upload por drop.
-  const { iframeRef, saveState, toast: editToast, runUndo } = useEditBridge(siteId, site?.niche ?? '', refreshPreview)
+  const { iframeRef, saveState, toast: editToast, runUndo } = useEditBridge(siteId, site?.niche ?? '', refreshPreview, secoes.pageId)
 
   // Dispara a geração de conteúdo (SSE). Usado tanto no auto-gen quanto no retry.
   async function generateContent() {
@@ -129,50 +171,25 @@ export default function EditorPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ site_id: siteId }),
       })
-      if (!res.ok || !res.body) {
-        const txt = await res.text().catch(() => '')
-        let msg = txt
-        try { msg = JSON.parse(txt).error ?? txt } catch { /* texto puro */ }
-        setGen({ state: 'error', msg: msg || 'Não consegui gerar o conteúdo agora.' })
-        return
-      }
-      const reader = res.body.getReader()
-      const dec = new TextDecoder()
-      let buf = '', errMsg = ''
-      for (;;) {
-        const { done, value } = await reader.read()
-        if (done) break
-        buf += dec.decode(value, { stream: true })
-        const m = buf.match(/"error":"([^"]*)"/)
-        if (m) errMsg = m[1] ?? ''
-      }
-      if (errMsg) { setGen({ state: 'error', msg: errMsg }); return }
+      await readSiteGeneration(res)
+      secoes.recarregar()
       setGen({ state: 'idle' })
       refreshPreview()
-    } catch {
-      setGen({ state: 'error', msg: 'Falha de conexão ao gerar o conteúdo.' })
+    } catch (error) {
+      setGen({ state: 'error', msg: error instanceof Error ? error.message : 'Falha de conexão ao gerar o conteúdo.' })
     }
   }
 
   // Na 1ª abertura: se a home ainda não tem seções, gera automaticamente.
   // (a geração não dispara mais no onboarding — o gatilho mora aqui agora.)
+  // Reaproveita a busca única do useHomeSections: era mais uma dupla de
+  // consultas encadeadas só pra contar seções.
   useEffect(() => {
-    if (!site || autoGenChecked.current) return
+    if (!site || secoes.loading || secoes.erro || autoGenChecked.current) return
     autoGenChecked.current = true
-    const supabase = createBrowserClient()
-    ;(async () => {
-      const { data: page } = await supabase
-        .from('pages').select('id').eq('site_id', siteId).eq('slug', 'home').maybeSingle()
-      let hasContent = false
-      if (page?.id) {
-        const { count } = await supabase
-          .from('sections').select('*', { count: 'exact', head: true }).eq('page_id', page.id)
-        hasContent = (count ?? 0) > 0
-      }
-      if (!hasContent) await generateContent()
-    })()
+    if (secoes.total === 0) void generateContent().then(() => secoes.recarregar())
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [site, siteId])
+  }, [site, secoes.loading, secoes.erro, secoes.total])
 
   async function handlePublish() {
     setPublishing(true)
@@ -216,7 +233,7 @@ export default function EditorPage() {
             <div style={{ textAlign: 'center', maxWidth: 360 }}>
               <p style={{ color: '#ff9b9b', fontWeight: 600 }}>Não consegui abrir o editor.</p>
               <p style={{ color: 'var(--muted)', fontSize: '.8rem', marginTop: '.4rem' }}>{loadError}</p>
-              <a href="/sites" className="btn glass sm" style={{ marginTop: '1rem' }}>Voltar pros meus sites</a>
+              <Link href="/sites" className="btn glass sm" style={{ marginTop: '1rem' }}>Voltar pros meus sites</Link>
             </div>
           ) : 'Carregando editor…'}
         </div>
@@ -227,30 +244,48 @@ export default function EditorPage() {
   return (
     <div className="painel-shell">
       <div className="aura" />
-      <div className="ed">
+      <div className={`ed ed--${activePanel}`}>
 
         {/* Barra de score SEO/GEO/AEO — âncora do produto, topo da grade */}
-        <ScoreBar siteId={siteId} refreshKey={previewKey} />
+        <div className="ed-score-slot" hidden={!showScore}><ScoreBar siteId={siteId} refreshKey={previewKey} /></div>
 
         {/* Rail de ícones */}
-        <EditorSidebar site={site} />
+        <EditorSidebar
+          site={site}
+          activePanel={activePanel}
+          onPanelChange={setActivePanel}
+          pendingPanel={trocandoPainel ? painelPendente : null}
+        />
 
         {/* Painéis de edição — esquerda (conteúdo) + direita (design).
             O CustomizationPanel devolve os dois <aside> já posicionados na grade. */}
         <CustomizationPanel
+          key={siteId}
+          activePanel={activePanel}
+          onPanelChange={setActivePanel}
           site={site}
           siteId={siteId}
           onSave={(updated) => { setSite(s => s ? { ...s, ...updated } : s); refreshPreview() }}
+          pageId={secoes.pageId}
+          sections={secoes.sections}
+          sectionsLoading={secoes.loading}
+          sectionsErro={secoes.erro}
+          onSectionSaved={secoes.atualizarSecao}
+          onSectionsReload={secoes.recarregar}
         />
 
         {/* Palco / preview */}
         <div className="ed-stage">
           <div className="ed-toolbar">
+            <button type="button" className="ed-icon-btn" onClick={() => setShowScore(value => !value)} aria-expanded={showScore} aria-label="Mostrar diagnóstico de otimização" title="Diagnóstico de otimização">
+              <i className="ph-duotone ph-chart-line-up" aria-hidden="true" />
+            </button>
             <div className="ed-seg">
               {(['desktop', 'mobile'] as ViewMode[]).map(mode => (
                 <button
                   key={mode}
                   onClick={() => setViewMode(mode)}
+                  aria-pressed={viewMode === mode}
                   className={viewMode === mode ? 'on' : ''}
                 >
                   {mode === 'desktop'
@@ -270,12 +305,12 @@ export default function EditorPage() {
               </span>
             )}
 
-            <button onClick={refreshPreview} className="ed-icon-btn" title="Recarregar preview">
+            <button onClick={refreshPreview} className="ed-icon-btn" title="Recarregar prévia" aria-label="Recarregar prévia">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
             </button>
 
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '.25rem' }}>
-              <button onClick={handlePublish} disabled={publishing} className="btn sm">
+              <button onClick={handlePublish} disabled={publishing || gen.state === 'running' || saveState === 'saving'} className="btn sm">
                 {publishing ? 'Publicando…' : site.status === 'published' ? 'Republicar →' : 'Publicar →'}
               </button>
               {publishMsg && (
@@ -404,5 +439,16 @@ export default function EditorPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+// useSearchParams exige uma fronteira de Suspense acima dele. Sem isto o
+// build do Next reclama ao tentar pré-renderizar a casca da rota. O fallback
+// é o mesmo esqueleto que a rota já usa, então não há troca de visual.
+export default function EditorPage() {
+  return (
+    <Suspense fallback={<EditorSkeleton />}>
+      <EditorPageInner />
+    </Suspense>
   )
 }

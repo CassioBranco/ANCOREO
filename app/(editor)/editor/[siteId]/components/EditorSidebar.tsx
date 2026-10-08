@@ -3,47 +3,46 @@
 import Link from 'next/link'
 import type { SiteData } from '../page'
 
+export type EditorPanel = 'content' | 'design' | 'preview'
+
 type Props = {
   site: SiteData
+  activePanel: EditorPanel
+  onPanelChange: (panel: EditorPanel) => void
+  // Aba clicada enquanto o painel novo ainda está montando. Sem isto o clique
+  // não devolve sinal nenhum e, num painel pesado, parece que não funcionou.
+  pendingPanel?: EditorPanel | null
 }
 
-// Rail do editor. Usa o MESMO vocabulário e os MESMOS ícones Phosphor da
-// navegação do painel (PainelNav) pra o cliente não perder o mapa mental ao
-// entrar no editor. "Personalizar" é o modo atual (edição inline). Os demais
-// são atalhos pras páginas dedicadas do painel; "Painel" leva de volta ao
-// menu completo. A âncora no topo volta pros "Meus sites".
-const LINKS: { href: string; label: string; icon: string }[] = [
-  { href: '/metrics',  label: 'Painel',         icon: 'ph-chart-line-up' },
-  { href: '/blog',     label: 'Blog',           icon: 'ph-article' },
-  { href: '/settings', label: 'Configurações',  icon: 'ph-gear' },
+const TOOLS: { id: EditorPanel; label: string; icon: string }[] = [
+  { id: 'content', label: 'Conteúdo', icon: 'ph-text-aa' },
+  { id: 'design', label: 'Estilo', icon: 'ph-palette' },
+  { id: 'preview', label: 'Prévia ampla', icon: 'ph-arrows-out' },
 ]
 
-export default function EditorSidebar({ site }: Props) {
+export default function EditorSidebar({ site, activePanel, onPanelChange, pendingPanel = null }: Props) {
   return (
-    <div className="ed-rail">
-      <Link href="/sites" className="mk" title="Voltar aos meus sites">
-        <i className="ph-fill ph-anchor" />
+    <nav className="ed-rail" aria-label="Ferramentas do editor">
+      <Link href="/sites" className="mk" title="Voltar aos meus sites" aria-label="Voltar aos meus sites">
+        <i className="ph-fill ph-anchor" aria-hidden="true" />
       </Link>
-
-      {/* Modo atual do editor: edição inline no preview */}
-      <button className="ed-tab on" title="Personalizar" disabled>
-        <i className="ph-duotone ph-pencil-ruler" />
-        Personalizar
-      </button>
-
-      {/* Atalhos pras páginas do painel — mesmos nomes/ícones da sidebar */}
-      {LINKS.map(l => (
-        <Link key={l.href} href={l.href} className="ed-tab" title={l.label}>
-          <i className={`ph-duotone ${l.icon}`} />
-          {l.label}
-        </Link>
-      ))}
-
-      <div className="foot">
-        <span className={`badge ${site.status === 'published' ? 'ok' : 'warn'}`}>
-          {site.status === 'published' ? 'No ar' : 'Rascunho'}
-        </span>
-      </div>
-    </div>
+      {TOOLS.map(tool => {
+        const ativo = activePanel === tool.id
+        const carregando = pendingPanel === tool.id && !ativo
+        return (
+          <button type="button" key={tool.id}
+            className={`ed-tab ${ativo ? 'on' : ''} ${carregando ? 'pendente' : ''}`}
+            onClick={() => onPanelChange(tool.id)} aria-pressed={ativo} aria-busy={carregando || undefined}>
+            <i className={`ph-duotone ${tool.icon}`} aria-hidden="true" />{tool.label}
+            {carregando && <span className="ed-tab-spin" aria-hidden="true" />}
+          </button>
+        )
+      })}
+      <Link href="/blog" className="ed-tab"><i className="ph-duotone ph-article" aria-hidden="true" />Blog</Link>
+      <Link href="/sites" className="ed-tab"><i className="ph-duotone ph-arrow-left" aria-hidden="true" />Meus sites</Link>
+      <div className="foot"><span className={`badge ${site.status === 'published' ? 'ok' : 'warn'}`}>
+        {site.status === 'published' ? 'No ar' : 'Rascunho'}
+      </span></div>
+    </nav>
   )
 }

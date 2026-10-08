@@ -1,7 +1,7 @@
 // Leitura pública de posts do blog (artigo + lista). Admin client filtrando
 // status='published' — mesmo padrão da vitrine (RLS só libera o dono logado).
 import { createAdminClient } from '@/lib/supabase/admin'
-import { publishedSiteId } from '@/lib/ecommerce/products'
+import { publishedSite } from '@/lib/sites/published'
 
 export type PublishedPost = {
   id: string
@@ -25,15 +25,16 @@ export type PostListItem = {
 }
 
 export async function getPublishedPostBySlug(domain: string, slug: string): Promise<PublishedPost | null> {
-  const siteId = await publishedSiteId(domain)
-  if (!siteId) return null
+  const site = await publishedSite(domain)
+  if (!site) return null
   const admin = createAdminClient()
   // select('*') tolera colunas de migrations não aplicadas (cover_image,
   // updated_at): listar coluna ausente erraria a query inteira.
   const { data } = await admin
     .from('blog_posts')
     .select('*')
-    .eq('site_id', siteId)
+    .eq('site_id', site.id)
+    .eq('tenant_id', site.tenant_id)
     .eq('slug', slug)
     .eq('status', 'published')
     .maybeSingle()
@@ -54,13 +55,14 @@ export async function getPublishedPostBySlug(domain: string, slug: string): Prom
 }
 
 export async function getPublishedPostsByDomain(domain: string): Promise<PostListItem[]> {
-  const siteId = await publishedSiteId(domain)
-  if (!siteId) return []
+  const site = await publishedSite(domain)
+  if (!site) return []
   const admin = createAdminClient()
   const { data } = await admin
     .from('blog_posts')
     .select('title, slug, meta_description, published_at')
-    .eq('site_id', siteId)
+    .eq('site_id', site.id)
+    .eq('tenant_id', site.tenant_id)
     .eq('status', 'published')
     .order('published_at', { ascending: false, nullsFirst: false })
   return (data ?? []) as PostListItem[]

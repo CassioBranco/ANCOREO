@@ -11,7 +11,8 @@
 // 200 pra endereço de negócio que não existe). Por isso a confirmação é
 // visual, e a única checagem dura é o encurtador morto, que dá 404.
 // ============================================================
-import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useState, useTransition } from 'react'
 import { lerLinkGpe, problemaDoLink, urlDeMapaEmbed } from '@/lib/seo/gpe-link'
 
 type Leitura = ReturnType<typeof lerLinkGpe>
@@ -23,6 +24,8 @@ export default function VincularPerfil({ buscaAlternativa }: { buscaAlternativa?
   const [mapa, setMapa] = useState('')
   const [nome, setNome] = useState('')
   const [pronto, setPronto] = useState(false)
+  const router = useRouter()
+  const [atualizando, iniciarAtualizacao] = useTransition()
 
   function digitou(v: string) {
     setLink(v)
@@ -74,9 +77,14 @@ export default function VincularPerfil({ buscaAlternativa }: { buscaAlternativa?
       }
       setPronto(true)
       setMapa('')
-      // A tela inteira depende disto (banner, cadência, conteúdo do site),
-      // então vale recarregar do servidor em vez de remendar o estado local.
-      setTimeout(() => window.location.reload(), 900)
+      // A tela inteira depende disto (banner do layout, cadência, conteúdo do
+      // site). Antes isto era window.location.reload(): recarga dura do
+      // navegador, que joga fora o bundle, o cache do roteador e o estado de
+      // toda a aplicação só pra reler uma linha do banco. router.refresh()
+      // refaz só os Server Components da rota atual (inclusive o layout, que é
+      // quem desenha o banner) e devolve o HTML por streaming, sem sair da
+      // página.
+      iniciarAtualizacao(() => router.refresh())
     } catch {
       setErro('Não consegui salvar agora. Tente de novo.')
     } finally {
@@ -90,7 +98,7 @@ export default function VincularPerfil({ buscaAlternativa }: { buscaAlternativa?
         <span className="ic"><i className="ph-fill ph-check-circle" /></span>
         <div>
           <b>Perfil vinculado{nome ? `: ${nome}` : ''}</b>
-          <p>Atualizando a tela…</p>
+          <p>{atualizando ? 'Atualizando a tela…' : 'Tudo certo. O painel já está com o perfil.'}</p>
         </div>
       </div>
     )

@@ -211,7 +211,7 @@ export default function SiteTemplate({ content: c, palette: p, preview = false }
                 <div key={i} style={{ backgroundColor: 'var(--sf)', borderRadius: '1rem', padding: '1.75rem', boxShadow: '0 2px 12px rgba(0,0,0,0.06)', border: '1px solid rgba(0,0,0,0.06)' }}>
                   <StarRating rating={t.rating} />
                   <p style={{ color: 'var(--sm)', fontSize: '0.95rem', lineHeight: 1.7, margin: '0.75rem 0' }}>
-                    "{t.text}"
+                    &quot;{t.text}&quot;
                   </p>
                   <p style={{ fontWeight: 700, fontSize: '0.875rem', color: 'var(--sp)' }}>— {t.name}</p>
                 </div>

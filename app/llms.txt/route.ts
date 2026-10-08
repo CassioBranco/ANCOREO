@@ -1,3 +1,4 @@
+import { isAppHost } from '@/lib/site-host'
 import { headers } from 'next/headers'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { hasSupabaseEnv } from '@/lib/env'
@@ -8,13 +9,6 @@ export const dynamic = 'force-dynamic'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://ancoreo.com.br'
 
-function isAppHost(host: string): boolean {
-  const h = (host.split(':')[0] ?? '').toLowerCase()
-  if (h === 'localhost' || h === '127.0.0.1') return true
-  if (h.endsWith('.vercel.app')) return true
-  try { if (h === new URL(APP_URL).hostname.toLowerCase()) return true } catch { /* ignora */ }
-  return false
-}
 
 function txt(body: string): Response {
   return new Response(body, {
@@ -179,11 +173,13 @@ export async function GET(): Promise<Response> {
         .from('pages')
         .select('slug, title, published')
         .eq('site_id', siteId)
+        .eq('tenant_id', built.tenantId)
         .eq('published', true),
       supabase
         .from('blog_posts')
         .select('slug, title, meta_description, published_at')
         .eq('site_id', siteId)
+        .eq('tenant_id', built.tenantId)
         .eq('status', 'published')
         .order('published_at', { ascending: false }),
     ])

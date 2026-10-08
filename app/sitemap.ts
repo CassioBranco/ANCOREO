@@ -1,17 +1,12 @@
+import { isAppHost } from '@/lib/site-host'
 import { MetadataRoute } from 'next'
 import { headers } from 'next/headers'
-import { createServerClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { publishedSite } from '@/lib/sites/published'
 import { hasSupabaseEnv } from '@/lib/env'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://ancoreo.com.br'
 
-function isAppHost(host: string): boolean {
-  const h = (host.split(':')[0] ?? '').toLowerCase()
-  if (h === 'localhost' || h === '127.0.0.1') return true
-  if (h.endsWith('.vercel.app')) return true
-  try { if (h === new URL(APP_URL).hostname.toLowerCase()) return true } catch { /* ignora */ }
-  return false
-}
 
 // sitemap.xml host-aware: site publicado lista só as SUAS páginas/artigos;
 // painel lista só a própria home. (AEO Regra 2 — sitemap por site.)
@@ -28,35 +23,27 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = `https://${hostname}`
 
   try {
-    const supabase = await createServerClient()
-
-    const { data: site } = await supabase
-      .from('sites')
-      .select('id')
-      .eq('domain', hostname)
-      .eq('status', 'published')
-      .maybeSingle()
-
-    if (!site?.id) {
-      return [{ url: baseUrl, lastModified: new Date(), changeFrequency: 'weekly', priority: 1 }]
-    }
+    const site = await publishedSite(hostname)
+    if (!site) return []
+    const supabase = createAdminClient()
 
     const [{ data: pages }, { data: posts }] = await Promise.all([
       supabase
         .from('pages')
-        .select('slug, updated_at')
+        .select('slug')
         .eq('site_id', site.id)
+        .eq('tenant_id', site.tenant_id)
         .eq('published', true),
       supabase
         .from('blog_posts')
         .select('slug, published_at')
         .eq('site_id', site.id)
+        .eq('tenant_id', site.tenant_id)
         .eq('status', 'published'),
     ])
 
     const pageEntries: MetadataRoute.Sitemap = (pages ?? []).map(p => ({
       url: p.slug === 'home' ? baseUrl : `${baseUrl}/${p.slug}`,
-      lastModified: new Date((p.updated_at as string) ?? Date.now()),
       changeFrequency: 'monthly' as const,
       priority: p.slug === 'home' ? 1 : 0.7,
     }))
