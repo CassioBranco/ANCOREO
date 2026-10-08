@@ -77,12 +77,25 @@ export async function POST(req: NextRequest) {
     .eq('resource', 'site_generation')
     .single()
 
+  // Geração que caiu antes de gastar IA (rota antiga sem chave, prompt ausente,
+  // timeout) não é abuso: fecha as presas em 'running' e só conta o que consumiu
+  // token. Antes, 3 falhas seguidas trancavam o usuário fora até o dia seguinte.
+  const expirou = new Date(Date.now() - 10 * 60 * 1000).toISOString()
+  await supabase
+    .from('ia_generations')
+    .update({ status: 'failed', output_data: { erro: 'expirou sem resposta (processo encerrado)' } })
+    .eq('tenant_id', tenantId)
+    .eq('agent', 'onboarding')
+    .eq('status', 'running')
+    .lt('created_at', expirou)
+
   const { count: usedToday } = await supabase
     .from('ia_generations')
     .select('*', { count: 'exact', head: true })
     .eq('tenant_id', tenantId)
     .eq('agent', 'onboarding')
     .gte('created_at', `${today}T00:00:00Z`)
+    .or('status.neq.failed,tokens_used.gt.0')
 
   if (quota?.hard_cap_daily && (usedToday ?? 0) >= quota.hard_cap_daily) {
     return new Response(
@@ -125,7 +138,7 @@ export async function POST(req: NextRequest) {
   } catch {
     await supabase
       .from('ia_generations')
-      .update({ status: 'failed' })
+      .update({ status: 'failed', output_data: { erro: 'prompts do agente onboarding não configurados' } })
       .eq('id', generationId)
     return new Response('Prompts não configurados. Contate o suporte.', { status: 500 })
   }
@@ -250,7 +263,11 @@ REGRAS DE FORMATO:
         }
 
         if (saveError) {
-          await supabase.from('ia_generations').update({ status: 'failed' }).eq('id', generationId)
+          // Mantém o que a IA devolveu: dá pra recuperar o texto sem gerar de novo.
+          await supabase.from('ia_generations').update({
+            status: 'failed',
+            output_data: { erro: `não salvo: ${saveError}`, conteudo: parsed ?? { raw: fullText } },
+          }).eq('id', generationId)
           controller.enqueue(enc.encode(`data: ${JSON.stringify({ error: `Conteúdo gerado mas não salvo: ${saveError}` })}\n\n`))
         } else {
           controller.enqueue(enc.encode(`data: ${JSON.stringify({ done: true, generation_id: generationId })}\n\n`))
@@ -258,7 +275,19 @@ REGRAS DE FORMATO:
       } catch (err) {
         const friendly = friendlyAIError(err)
         console.error('[generate/site] falha na geração:', err)
-        await supabase.from('ia_generations').update({ status: 'failed' }).eq('id', generationId)
+        // Motivo gravado na linha: as 4 falhas do andrey em 17/06 ficaram sem
+        // rastro nenhum. Mensagem do SDK (sem payload nem chave), cortada.
+        const bruto = err as { status?: number; name?: string; message?: string }
+        await supabase.from('ia_generations').update({
+          status: 'failed',
+          output_data: {
+            erro: friendly.message,
+            http: bruto?.status ?? null,
+            tipo: bruto?.name ?? null,
+            detalhe: String(bruto?.message ?? '').slice(0, 300),
+          },
+          duration_ms: Date.now() - startedAt,
+        }).eq('id', generationId)
         controller.enqueue(enc.encode(`data: ${JSON.stringify({ error: friendly.message })}\n\n`))
       } finally {
         controller.close()

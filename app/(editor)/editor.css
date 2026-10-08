@@ -294,6 +294,16 @@
 .painel-shell .ed-pubmsg.ok{color:#15803d}
 .dark .painel-shell .ed-pubmsg.ok{color:#86efac}
 .painel-shell .ed-pubmsg.err{color:hsl(var(--destructive))}
+/* Lista do que barrou a publicação. Flutua sob o botão pra não empurrar a
+   barra do editor; some no "Entendi" ou no próximo clique em Publicar. */
+.painel-shell .ed-pub-pontos{position:absolute;top:calc(100% + .4rem);right:0;z-index:30;
+  width:min(340px,80vw);padding:.8rem .9rem;border-radius:10px;
+  background:hsl(var(--background));border:1px solid hsl(var(--destructive) / .35);
+  box-shadow:0 10px 30px rgba(0,0,0,.14);font-size:.74rem;line-height:1.45;color:var(--ink)}
+.painel-shell .ed-pub-pontos ul{margin:0 0 .6rem;padding-left:1rem;display:grid;gap:.35rem}
+.painel-shell .ed-pub-pontos button{font-size:.72rem;font-weight:600;padding:.3rem .7rem;border-radius:999px;
+  border:1px solid hsl(var(--border));background:transparent;color:var(--ink);cursor:pointer}
+.painel-shell .ed-pub-pontos button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
 .painel-shell .ed-canvas{flex:1;overflow:auto;display:flex;align-items:flex-start;justify-content:center;
   padding:1.3rem;background:hsl(var(--muted) / .5)}

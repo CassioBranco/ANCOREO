@@ -24,8 +24,6 @@
 import { execFileSync } from 'node:child_process'
 import { readFileSync, writeFileSync } from 'node:fs'
 
-const LANCAMENTO = '2026-09-01'
-
 // ── 1. Sondas: a parte verificada ────────────────────────────
 // Regenera o ESTADO.md antes de ler, senão a planilha herda uma foto velha.
 try {
@@ -117,7 +115,6 @@ const pct = Math.round((prontos / doMvp.length) * 100)
 
 const hoje = new Date()
 const hojeISO = hoje.toISOString().slice(0, 10)
-const diasPraLancar = Math.round((new Date(LANCAMENTO) - new Date(hojeISO)) / 86400000)
 
 // Barra de progresso em texto: dá a noção em meio segundo, sem ler número.
 const CHEIOS = Math.round(pct / 5)
@@ -164,8 +161,7 @@ let md = `# PAINEL — em que passo estamos
 > Para abrir no Excel: **PAINEL.csv**, na mesma pasta.
 > Última geração: **${hojeISO}**
 
-\`${barra}\` **${pct}%** — ${prontos} de ${doMvp.length} itens do MVP prontos
-**${diasPraLancar} dias** para o lançamento (01/09)${esperandoVoce ? `
+\`${barra}\` **${pct}%** — ${prontos} de ${doMvp.length} itens do MVP prontos${esperandoVoce ? `
 **${esperandoVoce} ${esperandoVoce === 1 ? 'item depende' : 'itens dependem'} de você** para destravar` : ''}
 
 A coluna **como sabemos** é o que separa esta planilha de uma lista de desejos.
@@ -193,4 +189,4 @@ Definição de pronto: [MVP.md](MVP.md)
 `
 
 writeFileSync('PAINEL.md', md)
-console.log(`PAINEL gerado — ${pct}% (${prontos}/${doMvp.length}), ${esperandoVoce} esperando o Cássio, ${diasPraLancar} dias pro lançamento`)
+console.log(`PAINEL gerado — ${pct}% (${prontos}/${doMvp.length}), ${esperandoVoce} esperando o Cássio`)
