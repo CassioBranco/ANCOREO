@@ -25,7 +25,7 @@
 24;Site builder;"Content-Signal: separar ""pode me citar"" de ""pode me usar pra treinar""";FALTA;plano;R3 · 27/10 a 07/11
 25;Site builder;Site lento não publica (trava acima de 2,5 segundos);FALTA;plano;R3 · 27/10 a 07/11
 26;Site builder;Avisar quando uma página fica a mais de 3 cliques da home;FALTA;plano;R3 · 27/10 a 07/11
-27;Onboarding;Descobrir por que 9 sites são gerados e só 2 são publicados;FALTA;plano;R2 · 13/10 a 24/10
+27;Onboarding;"Descobrir por que 9 sites são gerados e só 2 são publicados (6 eram teste; falha sem motivo e publicação sem lista corrigidas)";PRONTO;plano;R2 · 13/10 a 24/10
 28;Onboarding;Opção Enterprise: sai do fluxo normal e cai no e-mail institucional;FALTA;plano;R2 · 13/10 a 24/10
 29;Blog builder;Publicar 5 posts de verdade e conferir os links entre eles;FALTA;plano;R3 · 27/10 a 07/11
 30;Fora do MVP;Cobrança da assinatura (o beta é grátis, então não corre);FORA DO MVP;plano;depois do lançamento

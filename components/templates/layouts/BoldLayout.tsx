@@ -2,6 +2,8 @@ import type { SiteContent } from '@/lib/templates/example-content'
 import SiteBrand from '../shared/SiteBrand'
 import Icon from '../shared/Icon'
 import type { PaletteColors } from '@/lib/templates/palettes'
+import { realStats, notaMedia } from '@/lib/templates/real-stats'
+import { fotoOu } from '@/lib/templates/foto'
 import SiteAnswer from '../shared/SiteAnswer'
 
 function cssVars(p: PaletteColors): string {
@@ -164,6 +166,7 @@ export default function BoldLayout({ c, p, preview }: { c: SiteContent; p: Palet
   const blogPosts = c.blogPosts.slice(0, 3)
   const faqs = c.faqs.slice(0, 7)
   const stats = c.stats ?? []
+  const nota = notaMedia(c)
   const firstTestimonial = testimonials[0]
 
   return (
@@ -194,7 +197,7 @@ export default function BoldLayout({ c, p, preview }: { c: SiteContent; p: Palet
       <header className="bd-hero bd-grain">
         <div className="bd-hero-bg">
           <img
-            src={c.heroImage ?? `https://picsum.photos/seed/${c.businessName}-hero/1920/1280`}
+            src={fotoOu(p, 1920, 1280, c.heroImage, c.aboutImage)}
             alt={`${c.businessName} em ${c.city}`}
             loading="eager"
           />
@@ -212,8 +215,8 @@ export default function BoldLayout({ c, p, preview }: { c: SiteContent; p: Palet
         </div>
         <div className="bd-hero-meta">
           <b>{c.city}</b> · {c.state}<br />
-          {c.address}<br />
-          <Icon name="star" size={13} /> {stats[3]?.value ?? '4.9'} · avaliações Google
+          {c.address}
+          {nota && <><br /><Icon name="star" size={13} /> {nota.media} · {nota.total} {nota.total === 1 ? 'avaliação' : 'avaliações'}</>}
         </div>
       </header>
 
@@ -242,7 +245,7 @@ export default function BoldLayout({ c, p, preview }: { c: SiteContent; p: Palet
           <div className="bd-wrap">
             <div className="bd-lead">
               <span className="bd-kicker">Serviços</span>
-              <h2>O cuidado completo, sem sair daqui.</h2>
+              <h2>O que fazemos{c.city ? ` em ${c.city}` : ''}.</h2>
             </div>
             <div className="bd-svc-list">
               {services.map((svc, i) => (
@@ -265,14 +268,14 @@ export default function BoldLayout({ c, p, preview }: { c: SiteContent; p: Palet
           <section className="bd-quote bd-grain" aria-label="Depoimento em destaque">
             <div className="bd-bg">
               <img
-                src={c.aboutImage ?? `https://picsum.photos/seed/${c.businessName}-quote/1920/900`}
+                src={fotoOu(p, 1920, 900, c.aboutImage, c.heroImage)}
                 alt={`${c.businessName}`}
                 loading="lazy"
               />
             </div>
             <div className="bd-ov" />
             <div className="bd-inner">
-              <span className="bd-kicker">{Array.from({ length: firstTestimonial.rating }).map((_, s) => <Icon key={s} name="star" size={12} />)} · avaliações Google</span>
+              <span className="bd-kicker">{firstTestimonial.rating > 0 ? Array.from({ length: Math.min(5, firstTestimonial.rating) }).map((_, s) => <Icon key={s} name="star" size={12} />) : "Depoimento"}</span>
               <blockquote>&quot;{firstTestimonial.text}&quot;</blockquote>
               <cite>{firstTestimonial.name}</cite>
             </div>
@@ -286,14 +289,14 @@ export default function BoldLayout({ c, p, preview }: { c: SiteContent; p: Palet
               <span className="bd-kicker">Sobre nós</span>
               <h2>{c.businessName}</h2>
               <p>{c.about}</p>
-              <div className="bd-tick"><span><Icon name="arrow-right" size={16} /></span> {c.yearsExperience} anos de experiência em {c.city}</div>
-              <div className="bd-tick"><span><Icon name="arrow-right" size={16} /></span> {c.credential}</div>
+              {c.yearsExperience > 0 && <div className="bd-tick"><span><Icon name="arrow-right" size={16} /></span> {c.yearsExperience} anos de experiência em {c.city}</div>}
+              {c.credential && <div className="bd-tick"><span><Icon name="arrow-right" size={16} /></span> {c.credential}</div>}
               {stats.slice(0, 2).map((s, i) => (
                 <div className="bd-tick" key={i}><span><Icon name="arrow-right" size={16} /></span> {s.value} {s.label}</div>
               ))}
             </div>
             <img
-              src={c.aboutImage ?? `https://picsum.photos/seed/${c.businessName}-about/760/950`}
+              src={fotoOu(p, 760, 950, c.aboutImage, c.heroImage)}
               alt={`Equipe de ${c.businessName}`}
               loading="lazy"
             />
@@ -333,7 +336,7 @@ export default function BoldLayout({ c, p, preview }: { c: SiteContent; p: Palet
           <div className="bd-wrap">
             <div className="bd-lead center">
               <span className="bd-kicker">Dúvidas frequentes</span>
-              <h2>Antes de vir.</h2>
+              <h2>O que você precisa saber.</h2>
             </div>
             <div className="bd-faq">
               {faqs.map((faq, i) => (
@@ -349,9 +352,9 @@ export default function BoldLayout({ c, p, preview }: { c: SiteContent; p: Palet
         {/* CTA FINAL */}
         <section className="bd-final" id="contato">
           <div className="bd-wrap">
-            <span className="bd-kicker">Agendamento</span>
-            <h2>Pare de adiar.<br /><em>Agende hoje.</em></h2>
-            <p>Entre em contato pelo WhatsApp e receba os horários disponíveis em minutos.</p>
+            <span className="bd-kicker">Contato</span>
+            <h2>Fale com<br /><em>{c.businessName}.</em></h2>
+            <p>Mande sua mensagem pelo WhatsApp e tire suas dúvidas direto com a gente.</p>
             <a href={whatsapp} className="bd-btn" style={{ padding: '1.2rem 3rem', fontSize: '1.05rem' }}>{c.ctaLabel}</a>
           </div>
         </section>
@@ -372,10 +375,12 @@ export default function BoldLayout({ c, p, preview }: { c: SiteContent; p: Palet
                 <a key={i} href="#especialidades">{s.name}</a>
               ))}
             </div>
-            <div>
-              <h4>Responsável</h4>
-              <p>{c.credential}</p>
-            </div>
+            {c.credential && (
+              <div>
+                <h4>Responsável</h4>
+                <p>{c.credential}</p>
+              </div>
+            )}
           </div>
           <div className="bd-foot-bottom">
             <span>© {new Date().getFullYear()} {c.businessName}</span>

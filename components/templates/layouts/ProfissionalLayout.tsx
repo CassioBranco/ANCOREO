@@ -2,6 +2,8 @@ import type { SiteContent } from '@/lib/templates/example-content'
 import SiteBrand from '../shared/SiteBrand'
 import Icon from '../shared/Icon'
 import type { PaletteColors } from '@/lib/templates/palettes'
+import { realStats, notaMedia } from '@/lib/templates/real-stats'
+import { fotoOu } from '@/lib/templates/foto'
 import SiteAnswer from '../shared/SiteAnswer'
 
 function cssVars(p: PaletteColors): string {
@@ -171,13 +173,8 @@ export default function ProfissionalLayout({
   const whatsapp = href(`https://wa.me/${c.whatsapp}?text=Olá, vim pelo site.`)
 
   // Build stats/credentials for the bar (up to 4)
-  const defaultStats = [
-    { value: `${c.yearsExperience}+`, label: `anos em ${c.city}` },
-    { value: `${c.services.length}`, label: 'especialidades' },
-    { value: '4.9 ★', label: 'avaliação média' },
-    { value: c.credential || 'Reg.', label: 'profissional registrado' },
-  ]
-  const stats = c.stats && c.stats.length >= 4 ? c.stats : defaultStats
+  // Só números reais: nada de nota ou contagem inventada.
+  const stats = realStats(c)
 
   // First testimonial for the giant quote
   const quote = c.testimonials[0]
@@ -189,7 +186,7 @@ export default function ProfissionalLayout({
       {/* TOPBAR */}
       <div className="p-topbar">
         <div className="p-wrap">
-          <span>{c.ctaPhone} · {c.email}</span>
+          <span>{[c.ctaPhone, c.email].filter(Boolean).join(' · ')}</span>
           <span>{c.city}/{c.state}</span>
         </div>
       </div>
@@ -202,11 +199,11 @@ export default function ProfissionalLayout({
             <em>{c.businessName.split(' ').slice(1).join(' ')}</em></SiteBrand>
           </a>
           <div className="p-nav-links">
-            <a href="#especialidades">Especialidades</a>
-            <a href="#sobre">A clínica</a>
+            <a href="#especialidades">Serviços</a>
+            <a href="#sobre">Sobre</a>
             <a href="#blog">Blog</a>
             <a href="#duvidas">Dúvidas</a>
-            <a href={whatsapp} className="p-btn">Agendar consulta</a>
+            <a href={whatsapp} className="p-btn">Fale conosco</a>
           </div>
         </div>
       </nav>
@@ -215,18 +212,18 @@ export default function ProfissionalLayout({
       <header className="p-wrap">
         <div className="p-hero">
           <div>
-            <span className="p-kicker">{c.city}/{c.state} · Desde {new Date().getFullYear() - c.yearsExperience}</span>
+            <span className="p-kicker">{c.city}{c.state ? `/${c.state}` : ''}{c.yearsExperience > 0 ? ` · Desde ${new Date().getFullYear() - c.yearsExperience}` : ''}</span>
             <h1>{c.heroHeadline}</h1>
             <p>{c.heroSub}</p>
             <SiteAnswer text={c.heroAnswer} />
             <div className="p-hero-cta">
               <a href={whatsapp} className="p-btn">{c.ctaLabel}</a>
-              <a href="#especialidades" className="p-btn p-btn-out">Ver especialidades</a>
+              <a href="#especialidades" className="p-btn p-btn-out">Ver os serviços</a>
             </div>
           </div>
           <div className="p-hero-img">
             <img
-              src={c.heroImage || `https://picsum.photos/seed/profissional-hero/760/950`}
+              src={fotoOu(p, 760, 950, c.heroImage, c.aboutImage)}
               alt={`${c.businessName} em ${c.city}`}
               loading="eager"
             />
@@ -235,7 +232,7 @@ export default function ProfissionalLayout({
       </header>
 
       {/* CREDENTIALS BAR */}
-      <section className="p-creds" aria-label="Credenciais">
+      {stats.length >= 2 && <section className="p-creds" aria-label="Números">
         <div className="p-wrap">
           {stats.slice(0, 4).map((s, i) => (
             <div className="p-cred" key={i}>
@@ -244,16 +241,15 @@ export default function ProfissionalLayout({
             </div>
           ))}
         </div>
-      </section>
+      </section>}
 
       <main>
         {/* SERVICES */}
         <section className="p-block" id="especialidades">
           <div className="p-wrap">
             <div className="p-head">
-              <span className="p-kicker">Especialidades</span>
-              <h2>O cuidado completo em {c.city}, num só endereço</h2>
-              <p>Profissionais com agenda própria, você consulta sempre com quem conhece seu histórico.</p>
+              <span className="p-kicker">Serviços</span>
+              <h2>O que fazemos{c.city ? ` em ${c.city}` : ''}</h2>
             </div>
             <div className="p-svc2">
               {c.services.map((svc, i) => (
@@ -288,23 +284,27 @@ export default function ProfissionalLayout({
         <section className="p-block p-about" id="sobre">
           <div className="p-wrap p-inner">
             <img
-              src={c.aboutImage || `https://picsum.photos/seed/profissional-about/760/570`}
-              alt={`Equipe ${c.businessName}`}
+              src={fotoOu(p, 760, 570, c.aboutImage, c.heroImage)}
+              alt={`Sobre ${c.businessName}`}
               loading="lazy"
             />
             <div>
-              <span className="p-kicker">A clínica</span>
-              <h2>Estrutura completa, atendimento de família</h2>
+              <span className="p-kicker">Sobre</span>
+              <h2>{c.businessName}</h2>
               <p>{c.about}</p>
               <div className="p-checks">
                 {c.credential && (
                   <div><span><Icon name="check" size={16} /></span> {c.credential}</div>
                 )}
-                <div><span><Icon name="check" size={16} /></span> {c.yearsExperience}+ anos de história em {c.city}</div>
+                {c.yearsExperience > 0 && (
+                  <div><span><Icon name="check" size={16} /></span> {c.yearsExperience}+ anos de história em {c.city}</div>
+                )}
                 {c.services.slice(0, 2).map((svc, i) => (
                   <div key={i}><span><Icon name="check" size={16} /></span> {svc.name}</div>
                 ))}
-                <div><span><Icon name="check" size={16} /></span> Atendimento em {c.address}</div>
+                {c.address && (
+                  <div><span><Icon name="check" size={16} /></span> Atendimento em {c.address}</div>
+                )}
               </div>
             </div>
           </div>
@@ -351,7 +351,7 @@ export default function ProfissionalLayout({
             <div className="p-wrap">
               <div className="p-head p-center">
                 <span className="p-kicker">Dúvidas frequentes</span>
-                <h2>O que você precisa saber antes de vir</h2>
+                <h2>O que você precisa saber</h2>
               </div>
               <div className="p-faq">
                 {c.faqs.map((faq, i) => (
@@ -369,7 +369,7 @@ export default function ProfissionalLayout({
       {/* CTA BAND */}
       <section className="p-cta-band" id="contato">
         <div className="p-wrap">
-          <h2>Agende sua consulta hoje e seja atendido pelo nome, não pela senha.</h2>
+          <h2>Fale com {c.businessName} pelo WhatsApp.</h2>
           <a href={whatsapp} className="p-btn" style={{ background: 'var(--sp)', color: '#fff' }}>
             {c.ctaLabel}
           </a>
@@ -392,8 +392,8 @@ export default function ProfissionalLayout({
             </div>
             <div>
               <h4>Navegue</h4>
-              <a href="#especialidades">Especialidades</a>
-              <a href="#sobre">A clínica</a>
+              <a href="#especialidades">Serviços</a>
+              <a href="#sobre">Sobre</a>
               <a href="#blog">Blog</a>
               <a href="#duvidas">Dúvidas frequentes</a>
             </div>

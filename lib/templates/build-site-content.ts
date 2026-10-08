@@ -153,7 +153,7 @@ export async function buildSiteContent(
                        .map(t => ({
                          name: t.name,
                          text: t.text,
-                         rating: t.rating ?? 5,
+                         rating: t.rating ?? 0, // sem nota = não entra na média (nada de 5 inventado)
                          ...(t.photo_url ? { photoUrl: t.photo_url } : {}),
                          ...(t.date ? { date: t.date } : {}),
                        })),

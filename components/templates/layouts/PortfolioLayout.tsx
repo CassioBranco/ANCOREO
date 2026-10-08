@@ -3,6 +3,7 @@ import SiteBrand from '../shared/SiteBrand'
 import Icon from '../shared/Icon'
 import type { PaletteColors } from '@/lib/templates/palettes'
 import SiteAnswer from '../shared/SiteAnswer'
+import { realStats } from '@/lib/templates/real-stats'
 
 function cssVars(p: PaletteColors): string {
   return `:root{--sp:${p.primary};--ss:${p.secondary};--sa:${p.accent};--sb:${p.bg};--sf:${p.surface};--st:${p.text};--sm:${p.muted}}`
@@ -134,6 +135,32 @@ footer.f-site { border-top: 1px solid var(--line); padding: 3.5rem 0 2.5rem; }
 .f-foot-grid a:hover { color: var(--st); }
 .f-foot-bottom { border-top: 1px solid var(--line); padding-top: 1.6rem; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 1rem; font-size: .82rem; color: var(--sm); }
 
+/* Serviços (cards reais: imagem só quando o dono subiu) */
+.f-svc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.4rem; }
+.f-svc { background: var(--sf); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; display: flex; flex-direction: column; }
+.f-svc img { aspect-ratio: 4/3; object-fit: cover; width: 100%; }
+.f-svc .f-svc-body { padding: 1.4rem 1.5rem 1.6rem; }
+.f-svc h3 { margin: 0 0 .5rem; font-size: 1.2rem; font-weight: 700; }
+.f-svc p { margin: 0; color: var(--sm); font-size: .95rem; line-height: 1.65; }
+
+/* Hero com uma imagem só, ou sem imagem */
+.f-hero-one { border-radius: 18px; overflow: hidden; aspect-ratio: 4/5; }
+.f-hero-one img { width: 100%; height: 100%; object-fit: cover; }
+.f-hero-list { background: var(--sf); border: 1px solid var(--line); border-radius: 18px; padding: 2rem 2.2rem; }
+.f-hero-list ul { list-style: none; margin: 1rem 0 0; padding: 0; }
+.f-hero-list li { padding: .9rem 0; border-top: 1px solid var(--line); font-weight: 600; font-size: 1.05rem; }
+.f-hero-list li:first-child { border-top: 0; }
+
+/* Depoimentos */
+.f-dep-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.4rem; }
+.f-dep { border: 1px solid var(--line); border-radius: 18px; padding: 1.8rem; display: flex; flex-direction: column; gap: 1rem; }
+.f-dep .f-stars { color: var(--sa); display: flex; gap: 2px; }
+.f-dep blockquote { margin: 0; line-height: 1.7; color: var(--st); }
+.f-dep cite { font-style: normal; font-weight: 700; font-size: .92rem; color: var(--sm); }
+
+.f-about.f-solo .f-inner { grid-template-columns: 1fr; max-width: 760px; }
+.f-cta.f-cta-plain { background: var(--st); }
+
 @media (max-width: 880px) {
   .f-wrap { padding: 0 1.4rem; }
   .f-nav-links a:not(.f-btn) { display: none; }
@@ -163,28 +190,15 @@ export default function PortfolioLayout({
   const href = (url: string) => (preview ? '#' : url)
   const whatsapp = href(`https://wa.me/${c.whatsapp}?text=Olá, vim pelo site.`)
 
-  // Build trust bar stats
-  const defaultStats = [
-    { value: `${c.yearsExperience} anos`, label: `em ${c.city}` },
-    { value: `${c.services.length}`, label: 'especialidades' },
-    { value: '4.9 ★', label: `${c.testimonials.length > 0 ? c.testimonials.length * 80 : 200}+ avaliações` },
-    { value: '+30 mil', label: 'atendimentos' },
-  ]
-  const trustStats = c.stats && c.stats.length >= 4 ? c.stats : defaultStats
+  // Só números reais (anos, nº de serviços, nota média dos depoimentos).
+  const trustStats = realStats(c).slice(0, 4)
 
-  // Gallery images from portfolio items or hero image repeated with seeds
-  const gallerySeeds = ['recepcao', 'consultorio1', 'pediatria', 'exames', 'espera', 'fachada']
-  const galleryLabels = ['Recepção', 'Consultório', 'Especialidades', 'Exames', 'Sala de espera', 'Fachada']
-  const galleryTags = ['Acolhimento', 'Consultório', 'Especialidades', 'Exames', 'Conforto', 'Chegada']
-
-  // About image stat row
-  const aboutStats = c.stats && c.stats.length >= 3
-    ? c.stats.slice(0, 3)
-    : [
-        { value: '40 min', label: 'por consulta' },
-        { value: '24h', label: 'resultado de exames' },
-        { value: '100%', label: 'acessível' },
-      ]
+  // Fotos que o próprio negócio subiu. Nada de banco de imagem aleatório.
+  const fotos = Array.from(new Set(
+    [c.heroImage, ...c.services.map(s => s.image), c.aboutImage].filter((u): u is string => !!u),
+  ))
+  const nomes = c.businessName.trim().split(/\s+/)
+  const palavras = c.heroHeadline.split(' ')
 
   return (
     <>
@@ -194,15 +208,14 @@ export default function PortfolioLayout({
       <nav className="f-site">
         <div className="f-wrap">
           <a className="f-brand" href="#">
-            <SiteBrand c={c}>{c.businessName.split(' ')[0]}{' '}
-            <em>{c.businessName.split(' ').slice(1).join(' ')}</em></SiteBrand>
+            <SiteBrand c={c}>{nomes[0]}{nomes.length > 1 && <>{' '}<em>{nomes.slice(1).join(' ')}</em></>}</SiteBrand>
           </a>
           <div className="f-nav-links">
-            <a href="#estrutura">Estrutura</a>
-            <a href="#sobre">A clínica</a>
-            <a href="#blog">Blog</a>
-            <a href="#duvidas">Dúvidas</a>
-            <a href={whatsapp} className="f-btn" style={{ padding: '.6rem 1.4rem' }}>Agendar</a>
+            {c.services.length > 0 && <a href="#servicos">Serviços</a>}
+            <a href="#sobre">Sobre</a>
+            {c.blogPosts.length > 0 && <a href="#blog">Blog</a>}
+            {c.faqs.length > 0 && <a href="#duvidas">Dúvidas</a>}
+            <a href={whatsapp} className="f-btn" style={{ padding: '.6rem 1.4rem' }}>Fale conosco</a>
           </div>
         </div>
       </nav>
@@ -211,11 +224,11 @@ export default function PortfolioLayout({
       <header className="f-wrap">
         <div className="f-hero">
           <div>
-            <span className="f-kicker">{c.city}/{c.state}</span>
-            <h1>{c.heroHeadline.includes(' ') ? (
+            {c.city && <span className="f-kicker">{c.city}{c.state ? `/${c.state}` : ''}</span>}
+            <h1>{palavras.length > 3 ? (
               <>
-                {c.heroHeadline.split(' ').slice(0, -2).join(' ')}{' '}
-                <em>{c.heroHeadline.split(' ').slice(-2).join(' ')}</em>
+                {palavras.slice(0, -2).join(' ')}{' '}
+                <em>{palavras.slice(-2).join(' ')}</em>
               </>
             ) : (
               c.heroHeadline
@@ -224,122 +237,103 @@ export default function PortfolioLayout({
             <SiteAnswer text={c.heroAnswer} />
             <div className="f-hero-cta">
               <a href={whatsapp} className="f-btn">{c.ctaLabel}</a>
-              <a href="#estrutura" className="f-btn f-btn-out">Ver a estrutura</a>
+              {c.services.length > 0 && <a href="#servicos" className="f-btn f-btn-out">Ver os serviços</a>}
             </div>
           </div>
-          {/* Hero 2x2 grid */}
-          <div className="f-hero-grid">
-            {[
-              { seed: 'recepcao', label: 'Recepção da clínica' },
-              { seed: 'consultorio', label: 'Consultório médico' },
-              { seed: 'espera', label: 'Sala de espera' },
-              { seed: 'exames', label: 'Sala de exames' },
-            ].map((cell, i) => (
-              <div className="f-cell" key={i}>
-                <span className="f-ix">0{i + 1}</span>
-                <img
-                  src={`https://picsum.photos/seed/harp-pf-${cell.seed}/600/${i === 0 || i === 3 ? 760 : 600}`}
-                  alt={cell.label}
-                  loading={i < 2 ? 'eager' : 'lazy'}
-                />
-              </div>
-            ))}
-          </div>
+          {fotos.length >= 4 ? (
+            <div className="f-hero-grid">
+              {fotos.slice(0, 4).map((src, i) => (
+                <div className="f-cell" key={i}>
+                  <img src={src} alt={`${c.businessName}, foto ${i + 1}`} loading={i < 2 ? 'eager' : 'lazy'} />
+                </div>
+              ))}
+            </div>
+          ) : fotos.length > 0 ? (
+            <div className="f-hero-one">
+              <img src={fotos[0]} alt={c.businessName} loading="eager" style={{ objectPosition: c.heroImagePos }} />
+            </div>
+          ) : c.services.length > 0 ? (
+            <div className="f-hero-list">
+              <span className="f-kicker">O que fazemos</span>
+              <ul>{c.services.slice(0, 5).map((s, i) => <li key={i}>{s.name}</li>)}</ul>
+            </div>
+          ) : null}
         </div>
       </header>
 
-      {/* TRUST STRIP */}
-      <section className="f-trust">
-        <div className="f-wrap f-row">
-          {trustStats.slice(0, 4).map((s, i) => (
-            <div key={i}>
-              <div className="f-n">{s.value}</div>
-              <div className="f-l">{s.label}</div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <main>
-        {/* GALLERY */}
-        <section className="f-block f-wrap" id="estrutura">
-          <div className="f-gal-head">
-            <h2>Cada ambiente pensado para você</h2>
-            <span className="f-lbl">Passe o mouse para explorar</span>
-          </div>
-          <div className="f-gallery">
-            {/* Feature (full width) */}
-            <div className="f-cell f-feature">
-              <span className="f-ix">A1</span>
-              <img
-                src={`https://picsum.photos/seed/harp-pf-amb-recepcao/1200/520`}
-                alt={`Recepção de ${c.businessName}`}
-                loading="lazy"
-              />
-              <div className="f-ov">
-                <span className="f-tag">Recepção</span>
-                <h3>Acolhimento desde a porta</h3>
-              </div>
-            </div>
-            {/* Three thirds */}
-            {gallerySeeds.slice(1, 4).map((seed, i) => (
-              <div className="f-cell f-third" key={i}>
-                <span className="f-ix">A{i + 2}</span>
-                <img
-                  src={`https://picsum.photos/seed/harp-pf-amb-${seed}/600/800`}
-                  alt={`${galleryLabels[i + 1]} de ${c.businessName}`}
-                  loading="lazy"
-                />
-                <div className="f-ov">
-                  <span className="f-tag">{galleryTags[i + 1]}</span>
-                  <h3>{galleryLabels[i + 1]}</h3>
-                </div>
-              </div>
-            ))}
-            {/* Two halves */}
-            {gallerySeeds.slice(4, 6).map((seed, i) => (
-              <div className="f-cell f-half" key={i}>
-                <span className="f-ix">A{i + 5}</span>
-                <img
-                  src={`https://picsum.photos/seed/harp-pf-amb-${seed}/800/600`}
-                  alt={`${galleryLabels[i + 4]} de ${c.businessName}`}
-                  loading="lazy"
-                />
-                <div className="f-ov">
-                  <span className="f-tag">{galleryTags[i + 4]}</span>
-                  <h3>{galleryLabels[i + 4]}</h3>
-                </div>
+      {/* NÚMEROS (só aparece com dado real) */}
+      {trustStats.length >= 2 && (
+        <section className="f-trust">
+          <div className="f-wrap f-row" style={{ gridTemplateColumns: `repeat(${trustStats.length}, 1fr)` }}>
+            {trustStats.map((s, i) => (
+              <div key={i}>
+                <div className="f-n">{s.value}</div>
+                <div className="f-l">{s.label}</div>
               </div>
             ))}
           </div>
         </section>
+      )}
 
-        {/* ABOUT */}
-        <section className="f-block f-about" id="sobre">
+      <main>
+        {/* SERVIÇOS */}
+        {c.services.length > 0 && (
+          <section className="f-block f-wrap" id="servicos">
+            <div className="f-gal-head">
+              <h2>Serviços</h2>
+            </div>
+            <div className="f-svc-grid">
+              {c.services.map((s, i) => (
+                <article className="f-svc" key={i}>
+                  {s.image && <img src={s.image} alt={s.name} loading="lazy" />}
+                  <div className="f-svc-body">
+                    <h3>{s.name}</h3>
+                    {s.description && <p>{s.description}</p>}
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* SOBRE */}
+        <section className={`f-block f-about${c.aboutImage ? '' : ' f-solo'}`} id="sobre">
           <div className="f-wrap f-inner">
-            <img
-              src={c.aboutImage || `https://picsum.photos/seed/harp-pf-equipe/780/620`}
-              alt={`Equipe de ${c.businessName}`}
-              loading="lazy"
-            />
+            {c.aboutImage && (
+              <img src={c.aboutImage} alt={`Sobre ${c.businessName}`} loading="lazy" style={{ objectPosition: c.aboutImagePos }} />
+            )}
             <div>
-              <span className="f-kicker">A clínica</span>
-              <h2>Estrutura completa, atendimento de família</h2>
+              <span className="f-kicker">Sobre</span>
+              <h2>{c.businessName}</h2>
               <p>{c.about}</p>
               {c.credential && (
                 <p style={{ fontWeight: 600, color: 'var(--sp)', marginBottom: '1.8rem' }}>{c.credential}</p>
               )}
-              <div className="f-stat-row">
-                {aboutStats.map((s, i) => (
-                  <div className="f-s" key={i}>
-                    <div className="f-n">{s.value}</div>
-                    <div className="f-l">{s.label}</div>
-                  </div>
-                ))}
-              </div>
             </div>
           </div>
         </section>
+
+        {/* DEPOIMENTOS */}
+        {c.testimonials.length > 0 && (
+          <section className="f-block f-wrap" id="depoimentos">
+            <div className="f-gal-head">
+              <h2>Quem já é cliente</h2>
+            </div>
+            <div className="f-dep-grid">
+              {c.testimonials.slice(0, 6).map((t, i) => (
+                <figure className="f-dep" key={i} style={{ margin: 0 }}>
+                  {t.rating > 0 && (
+                    <div className="f-stars" aria-label={`${t.rating} de 5`}>
+                      {Array.from({ length: Math.min(5, t.rating) }).map((_, s) => <Icon key={s} name="star" size={14} />)}
+                    </div>
+                  )}
+                  <blockquote>{t.text}</blockquote>
+                  <cite>{t.name}</cite>
+                </figure>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* BLOG */}
         {c.blogPosts && c.blogPosts.length > 0 && (
@@ -353,8 +347,7 @@ export default function PortfolioLayout({
             <div className="f-post-grid">
               {c.blogPosts.slice(0, 3).map((post, i) => (
                 <a className="f-post" href="#blog" key={i}>
-                  <img src={post.image} alt={post.title} loading="lazy" />
-                  <span className="f-cat">{post.excerpt.split(' ')[0]}</span>
+                  {post.image && <img src={post.image} alt={post.title} loading="lazy" />}
                   <h3>{post.title}</h3>
                   <p>{post.excerpt}</p>
                   <span className="f-by">{post.date}</span>
@@ -384,19 +377,15 @@ export default function PortfolioLayout({
           </section>
         )}
 
-        {/* CTA full-bleed */}
+        {/* CONTATO */}
         <section className="f-wrap" id="contato">
-          <div className="f-cta">
-            <img
-              src={`https://picsum.photos/seed/harp-pf-cta/1280/520`}
-              alt={`Ambiente de ${c.businessName}`}
-              loading="lazy"
-            />
-            <div className="f-cta-ov" />
+          <div className={`f-cta${c.heroImage ? '' : ' f-cta-plain'}`}>
+            {c.heroImage && <img src={c.heroImage} alt="" aria-hidden="true" loading="lazy" />}
+            {c.heroImage && <div className="f-cta-ov" />}
             <div className="f-cta-inner">
-              <span className="f-kicker">Agendamento</span>
-              <h2>Venha conhecer. Você vai querer ser atendido aqui.</h2>
-              <p>Agende sua consulta ou marque uma visita — recebemos você.</p>
+              <span className="f-kicker">Contato</span>
+              <h2>Fale com {c.businessName}</h2>
+              <p>Mande sua mensagem pelo WhatsApp e tire suas dúvidas direto com a gente.</p>
               <a href={whatsapp} className="f-btn">{c.ctaLabel}</a>
             </div>
           </div>
@@ -409,23 +398,23 @@ export default function PortfolioLayout({
           <div className="f-foot-grid">
             <div>
               <h4>{c.businessName}</h4>
-              <p>{c.address}</p>
-              <p>{c.ctaPhone} · {c.email}</p>
+              {c.address && <p>{c.address}</p>}
+              {(c.ctaPhone || c.email) && <p>{[c.ctaPhone, c.email].filter(Boolean).join(' · ')}</p>}
             </div>
             <div>
               <h4>Localização</h4>
-              <p>{c.city}/{c.state}</p>
+              <p>{c.city}{c.state ? `/${c.state}` : ''}</p>
             </div>
             <div>
               <h4>Navegue</h4>
-              <a href="#estrutura">Estrutura</a>
-              <a href="#sobre">A clínica</a>
-              <a href="#blog">Blog</a>
-              <a href="#duvidas">Dúvidas</a>
+              {c.services.length > 0 && <a href="#servicos">Serviços</a>}
+              <a href="#sobre">Sobre</a>
+              {c.blogPosts.length > 0 && <a href="#blog">Blog</a>}
+              {c.faqs.length > 0 && <a href="#duvidas">Dúvidas</a>}
             </div>
             <div>
               <h4>Contato</h4>
-              <p>{c.ctaPhone}</p>
+              {c.ctaPhone && <p>{c.ctaPhone}</p>}
               {c.credential && <p>{c.credential}</p>}
             </div>
           </div>

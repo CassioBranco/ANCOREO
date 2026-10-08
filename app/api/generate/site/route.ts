@@ -46,7 +46,14 @@ export async function POST(req: NextRequest) {
   const { data: ownSite, error: siteError } = await supabase.from('sites')
     .select('id,status').eq('id', site_id).eq('tenant_id', tenantId).single()
   if (siteError || !ownSite) return Response.json({ error: 'Site não encontrado ou sem acesso.' }, { status: 403 })
-  if (ownSite.status === 'published') return Response.json({ error: 'Para proteger o conteúdo no ar, a regeneração está disponível apenas para rascunhos.' }, { status: 409 })
+  // Publicado com a home vazia não tem conteúdo no ar a proteger: recusar
+  // aqui deixava o editor travado num "não consegui gerar" sem saída.
+  if (ownSite.status === 'published') {
+    const { data: home } = await supabase.from('pages')
+      .select('id, sections(id)').eq('site_id', site_id).eq('slug', 'home').maybeSingle()
+    const temConteudo = ((home?.sections ?? []) as unknown[]).length > 0
+    if (temConteudo) return Response.json({ error: 'Para proteger o conteúdo no ar, a regeneração está disponível apenas para rascunhos.' }, { status: 409 })
+  }
 
   // ── Perfil do onboarding ──────────────────────────────────
   const { data: profile } = await supabase

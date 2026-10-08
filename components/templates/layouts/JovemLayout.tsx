@@ -2,6 +2,8 @@ import type { SiteContent } from '@/lib/templates/example-content'
 import SiteBrand from '../shared/SiteBrand'
 import Icon from '../shared/Icon'
 import type { PaletteColors } from '@/lib/templates/palettes'
+import { realStats, notaMedia } from '@/lib/templates/real-stats'
+import { fotoOu } from '@/lib/templates/foto'
 import SiteFAQ from '../shared/SiteFAQ'
 import SiteBlog from '../shared/SiteBlog'
 import SiteFooter from '../shared/SiteFooter'
@@ -48,8 +50,13 @@ export default function JovemLayout({ c, p, preview }: { c: SiteContent; p: Pale
               <SiteBrand c={c}>{c.businessName.split(' ')[0]} <b style={{ color: 'var(--sp)' }}>{c.businessName.split(' ').slice(1).join(' ') || '.'}</b></SiteBrand>
             </span>
             <div style={{ display: 'flex', gap: '1.6rem', alignItems: 'center', ...mono, fontSize: '.85rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.05em' }}>
-              {['Serviços', 'Equipe', 'Blog', 'Contato'].map(item => (
-                <a key={item} href="#" style={{ textDecoration: 'none', color: 'inherit' }}>{item}</a>
+              {[
+                c.services.length > 0 && ['Serviços', '#servicos'],
+                (c.team?.length ?? 0) > 0 && ['Equipe', '#equipe'],
+                (c.blogPosts?.length ?? 0) > 0 && ['Blog', '#blog'],
+                ['Contato', '#contato'],
+              ].filter((x): x is string[] => !!x).map(([label, anchor]) => (
+                <a key={label} href={anchor} style={{ textDecoration: 'none', color: 'inherit' }}>{label}</a>
               ))}
               <a href={href(whatsapp)} style={{
                 display: 'inline-flex', alignItems: 'center', gap: '.5rem',
@@ -78,7 +85,7 @@ export default function JovemLayout({ c, p, preview }: { c: SiteContent; p: Pale
                 boxShadow: '4px 4px 0 var(--ink)', transform: 'rotate(-3deg)',
                 fontSize: '.8rem', marginBottom: '1.2rem',
               }}>
-                <Icon name="bolt" size={14} /> {c.tagline ?? c.city} · {c.city}
+                <Icon name="bolt" size={14} /> {c.city}{c.state ? `/${c.state}` : ''}
               </span>
 
               {/* H1 — tipografia tripla */}
@@ -136,7 +143,7 @@ export default function JovemLayout({ c, p, preview }: { c: SiteContent; p: Pale
                 transform: 'rotate(2deg)', overflow: 'hidden', position: 'relative',
               }}>
                 <img
-                  src={c.heroImage ?? `https://picsum.photos/seed/${c.businessName}-hero/640/800`}
+                  src={fotoOu(p, 640, 800, c.heroImage, c.aboutImage)}
                   alt={`${c.businessName} – ${c.city}`}
                   width={640} height={800}
                   style={{ width: '100%', aspectRatio: '4/5', objectFit: 'cover', display: 'block', filter: 'grayscale(1) contrast(1.2)', mixBlendMode: 'multiply' }}
@@ -154,6 +161,7 @@ export default function JovemLayout({ c, p, preview }: { c: SiteContent; p: Pale
                 transform: 'rotate(6deg)', zIndex: 3,
               }} />
               {/* Stamp */}
+              {c.yearsExperience > 0 && (
               <div style={{
                 position: 'absolute', bottom: '-22px', left: '-22px',
                 width: '96px', height: '96px', borderRadius: '50%',
@@ -164,6 +172,7 @@ export default function JovemLayout({ c, p, preview }: { c: SiteContent; p: Pale
               }}>
                 {c.yearsExperience}+<br />anos
               </div>
+              )}
             </div>
           </div>
         </header>
@@ -185,18 +194,21 @@ export default function JovemLayout({ c, p, preview }: { c: SiteContent; p: Pale
         </div>
 
         {/* SERVIÇOS — flash grid 4 colunas */}
-        <section style={{ padding: '5.5rem 0' }}>
+        {c.services.length > 0 && (
+        <section id="servicos" style={{ padding: '5.5rem 0' }}>
           <div style={wrap}>
             <div style={{ marginBottom: '2.8rem' }}>
               <span style={{ ...mono, fontSize: '.72rem', fontWeight: 700, letterSpacing: '.15em', textTransform: 'uppercase', color: 'var(--sp)' }}>
                 {'// '}O que fazemos
               </span>
               <h2 style={{ ...smash, fontSize: 'clamp(2.2rem, 6vw, 4.5rem)', margin: '.6rem 0 .5rem' }}>
-                Serviços &amp; estilos
+                Serviços
               </h2>
-              <p style={{ ...mono, fontSize: '1rem', maxWidth: '38rem' }}>
-                Arte com técnica, entrega com energia. Cada serviço pensado para {c.city} e região.
-              </p>
+              {c.city && (
+                <p style={{ ...mono, fontSize: '1rem', maxWidth: '38rem' }}>
+                  Atendimento em {c.city} e região.
+                </p>
+              )}
             </div>
 
             {/* Flash grid */}
@@ -217,33 +229,24 @@ export default function JovemLayout({ c, p, preview }: { c: SiteContent; p: Pale
                   <div style={{ fontSize: '2.5rem', marginBottom: '.75rem', position: 'relative', zIndex: 2 }}>{svc.image ? <img src={svc.image} alt="" style={{ width: 56, height: 56, borderRadius: 10, objectFit: 'cover' }} /> : svc.icon}</div>
                   <h3 style={{ ...smash, fontSize: '1rem', margin: '0 0 .5rem', textAlign: 'center', position: 'relative', zIndex: 2 }}>{svc.name}</h3>
                   <p style={{ ...mono, fontSize: '.7rem', textAlign: 'center', lineHeight: 1.4, margin: 0, position: 'relative', zIndex: 2, opacity: .8 }}>{svc.description}</p>
-                  {/* Label bottom */}
-                  <span style={{
-                    position: 'absolute', left: '.5rem', bottom: '.5rem', zIndex: 3,
-                    backgroundColor: 'var(--paper)', color: 'var(--ink)', ...mono,
-                    fontWeight: 700, fontSize: '.7rem', textTransform: 'uppercase',
-                    padding: '.2rem .5rem', border: '2px solid var(--ink)',
-                  }}>{svc.name}</span>
                 </div>
               ))}
             </div>
           </div>
         </section>
+        )}
 
         {/* EQUIPE — crew dark */}
         {c.team && c.team.length > 0 && (
-          <section style={{ padding: '5.5rem 0', backgroundColor: 'var(--ink)', color: 'var(--paper)' }}>
+          <section id="equipe" style={{ padding: '5.5rem 0', backgroundColor: 'var(--ink)', color: 'var(--paper)' }}>
             <div style={wrap}>
               <div style={{ marginBottom: '2.8rem' }}>
                 <span style={{ ...mono, fontSize: '.72rem', fontWeight: 700, letterSpacing: '.15em', textTransform: 'uppercase', color: 'var(--sa)' }}>
-                  {'// '}Quem segura o trampo
+                  {'// '}Equipe
                 </span>
                 <h2 style={{ ...smash, fontSize: 'clamp(2.2rem, 6vw, 4.5rem)', margin: '.6rem 0 .5rem', color: 'var(--paper)' }}>
-                  A equipe
+                  Quem faz {c.businessName}
                 </h2>
-                <p style={{ ...mono, color: 'color-mix(in srgb, var(--paper) 75%, transparent)', fontSize: '1rem' }}>
-                  Profissionais que respiram {c.tagline ?? 'o ofício'} e entregam com qualidade.
-                </p>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.8rem' }}>
@@ -254,7 +257,7 @@ export default function JovemLayout({ c, p, preview }: { c: SiteContent; p: Pale
                   }}>
                     <div style={{ aspectRatio: '1', overflow: 'hidden', borderBottom: '3px solid var(--paper)', position: 'relative' }}>
                       <img
-                        src={member.image}
+                        src={fotoOu(p, 420, 420, member.image)}
                         alt={member.name}
                         width={420} height={420}
                         style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', filter: 'grayscale(1) contrast(1.2)' }}
@@ -272,43 +275,13 @@ export default function JovemLayout({ c, p, preview }: { c: SiteContent; p: Pale
           </section>
         )}
 
-        {/* COMO FUNCIONA — steps */}
-        <section style={{ padding: '5.5rem 0' }}>
-          <div style={wrap}>
-            <div style={{ marginBottom: '2.8rem', textAlign: 'center' }}>
-              <span style={{ ...mono, fontSize: '.72rem', fontWeight: 700, letterSpacing: '.15em', textTransform: 'uppercase', color: 'var(--sp)' }}>
-                {'// '}Sem mistério
-              </span>
-              <h2 style={{ ...smash, fontSize: 'clamp(2.2rem, 6vw, 4.5rem)', margin: '.6rem 0 .5rem' }}>
-                Como funciona
-              </h2>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem' }}>
-              {[
-                { n: '01', title: 'Fale com a gente', desc: `Entre em contato pelo WhatsApp ou telefone. Atendemos em ${c.city} e região.` },
-                { n: '02', title: 'Diagnóstico gratuito', desc: 'Analisamos sua situação e apresentamos as melhores opções sem compromisso.' },
-                { n: '03', title: 'Resultado garantido', desc: `Execução com qualidade, prazo e comprometimento total com o seu resultado.` },
-              ].map((step, i) => (
-                <div key={i} style={{
-                  border: '3px solid var(--ink)', backgroundColor: 'var(--paper)',
-                  boxShadow: '6px 6px 0 var(--ink)', padding: '1.5rem',
-                  transform: i === 1 ? 'rotate(-1deg)' : undefined,
-                }}>
-                  <div style={{ ...smash, fontSize: '2.6rem', lineHeight: 1, color: 'var(--sp)', WebkitTextStroke: '1.5px var(--ink)' }}>{step.n}</div>
-                  <h3 style={{ ...smash, fontSize: '1.15rem', margin: '.6rem 0 .4rem' }}>{step.title}</h3>
-                  <p style={{ ...mono, fontSize: '.9rem', lineHeight: 1.55, margin: 0 }}>{step.desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
 
         {/* DEPOIMENTO — shout */}
         {c.testimonials && c.testimonials.length > 0 && (
           <section style={{ padding: '5.5rem 0', backgroundColor: 'var(--ink)', color: 'var(--paper)', textAlign: 'center' }}>
             <div style={wrap}>
               <span style={{ ...mono, fontSize: '.72rem', fontWeight: 700, letterSpacing: '.15em', textTransform: 'uppercase', color: 'var(--sa)' }}>
-                {'// '}{c.testimonials.length}+ avaliações positivas
+                {'// '}Quem já é cliente
               </span>
               <blockquote style={{
                 ...smash, fontSize: 'clamp(1.8rem, 5vw, 3.6rem)', lineHeight: .95,
@@ -324,9 +297,10 @@ export default function JovemLayout({ c, p, preview }: { c: SiteContent; p: Pale
           </section>
         )}
 
-        {/* SOBRE — about com imagem */}
-        <section style={{ padding: '5.5rem 0' }}>
-          <div style={{ ...wrap, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4rem', alignItems: 'center' }}>
+        {/* SOBRE — about com imagem (só quando o dono subiu foto) */}
+        <section id="sobre" style={{ padding: '5.5rem 0' }}>
+          <div style={{ ...wrap, display: 'grid', gridTemplateColumns: c.aboutImage ? '1fr 1fr' : '1fr', maxWidth: c.aboutImage ? undefined : '760px', gap: '4rem', alignItems: 'center' }}>
+            {c.aboutImage && (
             <div style={{ position: 'relative' }}>
               <div style={{ border: '3px solid var(--ink)', boxShadow: '8px 8px 0 var(--sp)', overflow: 'hidden', transform: 'rotate(-1.5deg)' }}>
                 <img
@@ -338,6 +312,7 @@ export default function JovemLayout({ c, p, preview }: { c: SiteContent; p: Pale
                 <div style={{ position: 'absolute', inset: 0, background: 'var(--sa)', mixBlendMode: 'screen', opacity: .3 }} />
               </div>
             </div>
+            )}
             <div>
               <span style={{ ...mono, fontSize: '.72rem', fontWeight: 700, letterSpacing: '.15em', textTransform: 'uppercase', color: 'var(--sp)' }}>
                 {'// '}Sobre nós
@@ -358,12 +333,7 @@ export default function JovemLayout({ c, p, preview }: { c: SiteContent; p: Pale
                 </div>
               )}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1.5rem' }}>
-                {(c.stats ?? [
-                  { value: `${c.yearsExperience}+`, label: 'Anos de experiência' },
-                  { value: '200+', label: 'Clientes atendidos' },
-                  { value: '4.9★', label: 'Avaliação média' },
-                  { value: '100+', label: 'Avaliações' },
-                ]).slice(0, 4).map((s, i) => (
+                {realStats(c).slice(0, 4).map((s, i) => (
                   <div key={i} style={{ border: '3px solid var(--ink)', backgroundColor: 'var(--paper)', boxShadow: '4px 4px 0 var(--ink)', padding: '1rem', textAlign: 'center' }}>
                     <p style={{ ...smash, fontSize: '2rem', color: i % 2 === 0 ? 'var(--sp)' : 'var(--sa)', margin: 0, lineHeight: 1 }}>{s.value}</p>
                     <p style={{ ...mono, fontSize: '.7rem', margin: '.3rem 0 0', textTransform: 'uppercase', letterSpacing: '.05em' }}>{s.label}</p>
@@ -374,11 +344,11 @@ export default function JovemLayout({ c, p, preview }: { c: SiteContent; p: Pale
           </div>
         </section>
 
-        <SiteBlog c={c} />
-        <SiteFAQ c={c} />
+        <div id="blog"><SiteBlog c={c} /></div>
+        <div id="duvidas"><SiteFAQ c={c} /></div>
 
         {/* CTA FINAL — dark band */}
-        <section style={{ padding: '5.5rem 0', backgroundColor: 'var(--ink)', color: 'var(--paper)', textAlign: 'center', position: 'relative' }}>
+        <section id="contato" style={{ padding: '5.5rem 0', backgroundColor: 'var(--ink)', color: 'var(--paper)', textAlign: 'center', position: 'relative' }}>
           <div style={wrap}>
             <span style={{ ...mono, fontSize: '.72rem', fontWeight: 700, letterSpacing: '.15em', textTransform: 'uppercase', color: 'var(--sa)' }}>
               {'// '}Bora?

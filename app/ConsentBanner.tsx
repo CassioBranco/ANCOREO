@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import './consent.css'
 
 // Banner de privacidade (telemetria). Modelo transparência + opt-out:
@@ -40,6 +41,10 @@ function isAppHost(): boolean {
 
 export default function ConsentBanner() {
   const [show, setShow] = useState(false)
+  // No editor o banner cobria a barra de baixo do preview. A pessoa já viu o
+  // aviso no painel antes de chegar aqui; no editor ele só atrapalha.
+  const path = usePathname() ?? ''
+  const noEditor = path.startsWith('/editor') || path.startsWith('/preview')
 
   useEffect(() => {
     // Mostra só se for host do app e o usuário ainda não respondeu.
@@ -48,7 +53,7 @@ export default function ConsentBanner() {
     }
   }, [])
 
-  if (!show) return null
+  if (!show || noEditor) return null
 
   function accept() {
     setCookie('aco_consent', '1')

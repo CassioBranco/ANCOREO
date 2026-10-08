@@ -203,6 +203,43 @@ async function semear() {
     if (error) console.log(`  aviso: pages/${p.slug} -> ${error.message}`)
   }
 
+  // 7. Conteúdo da home. Sem seções o site "publicado" era uma casca: o
+  //    editor abria vazio, tentava gerar e a rota recusava por estar no ar.
+  const { data: home } = await db.from('pages')
+    .select('id').eq('site_id', site.id).eq('slug', 'home').maybeSingle()
+  if (home) {
+    const secoes = [
+      { section_type: 'hero', content: {
+        headline: 'Padaria Pão Quente em Sorocaba',
+        sub: 'Pão francês saindo do forno de hora em hora, bolo por encomenda e café da manhã das 6h às 11h.',
+        cta_label: 'Quero Encomendar', cta_phone: '' } },
+      { section_type: 'about', content: {
+        body: 'A Padaria Pão Quente atende o bairro há 18 anos com fornada de pão francês a cada hora, das 6h às 20h. A massa descansa a noite toda, por isso a casca estala e o miolo fica leve. Além do balcão, fazemos bolo caseiro e de festa por encomenda, com 48 horas de antecedência, e entregamos nos bairros vizinhos de Sorocaba.' } },
+      { section_type: 'services', content: { items: [
+        { icon: '', name: 'Pão francês de hora em hora', description: 'Fornada nova a cada hora, das 6h às 20h. Você chega e o pão está quente.' },
+        { icon: '', name: 'Bolo por encomenda', description: 'Bolo caseiro e de festa com 48h de antecedência. Recheios tradicionais e de época.' },
+        { icon: '', name: 'Café da manhã', description: 'Mesa de café das 6h às 11h, com pão na chapa, tapioca e suco natural.' },
+      ] } },
+      { section_type: 'testimonials', content: { items: [
+        { name: 'Marta L.', text: 'O pão das 7h é o melhor da região. Compro todo dia antes do trabalho.', rating: 5 },
+        { name: 'Rogério P.', text: 'Encomendei o bolo do aniversário da minha filha e chegou no horário, do jeito que pedi.', rating: 5 },
+      ] } },
+      { section_type: 'faq', content: { items: [
+        { question: 'Qual o horário da padaria?', answer: 'Abrimos todos os dias das 6h às 20h. O café da manhã é servido das 6h às 11h.' },
+        { question: 'Com quanto tempo preciso encomendar um bolo?', answer: 'Com 48 horas de antecedência. Bolos de festa acima de 3 kg pedem 72 horas.' },
+        { question: 'Vocês entregam?', answer: 'Sim, nos bairros vizinhos de Sorocaba. A taxa depende da distância.' },
+      ] } },
+      { section_type: 'meta', content: {
+        title: 'Padaria Pão Quente em Sorocaba | Pão fresco de hora em hora',
+        description: 'Padaria de bairro em Sorocaba com pão francês de hora em hora, bolo por encomenda e café da manhã das 6h às 11h. Entrega na região.',
+        keywords: ['padaria em Sorocaba', 'bolo por encomenda Sorocaba', 'pão francês Sorocaba', 'café da manhã Sorocaba'] } },
+    ]
+    const linhas = secoes.map((x, i) => ({ ...x, order_index: i, page_id: home.id, tenant_id: tenant.id }))
+    const { error } = await db.from('sections').upsert(linhas, { onConflict: 'page_id,section_type', ignoreDuplicates: true })
+    if (error) console.log(`  aviso: sections -> ${error.message}`)
+    else console.log('seções da home ok')
+  }
+
   console.log(`
 ──────────────────────────────────────────────
 Empresa de teste pronta.

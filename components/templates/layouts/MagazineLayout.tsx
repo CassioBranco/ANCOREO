@@ -2,6 +2,7 @@ import type { SiteContent } from '@/lib/templates/example-content'
 import SiteBrand from '../shared/SiteBrand'
 import Icon from '../shared/Icon'
 import type { PaletteColors } from '@/lib/templates/palettes'
+import { fotoOu } from '@/lib/templates/foto'
 import SiteAnswer from '../shared/SiteAnswer'
 
 function cssVars(p: PaletteColors) {
@@ -148,11 +149,11 @@ export default function MagazineLayout({ c, p, preview }: { c: SiteContent; p: P
         </div>
         <nav className="mag-navbar">
           <a href={href('/')} className="on">Início</a>
-          <a href="#prevencao">Conteúdo</a>
-          <a href="#especialidades">Especialidades</a>
-          <a href="#blog">Blog</a>
+          <a href="#sobre">Sobre</a>
+          <a href="#especialidades">Serviços</a>
+          {posts.length > 0 && <a href={href('/blog')}>Blog</a>}
           <a href="#duvidas">Dúvidas</a>
-          <a href={href(whatsapp)}>Agendar</a>
+          <a href={href(whatsapp)}>Fale conosco</a>
         </nav>
       </header>
 
@@ -165,7 +166,7 @@ export default function MagazineLayout({ c, p, preview }: { c: SiteContent; p: P
                 <span className="mag-tag">Capa · {posts[0]?.title?.split(' ')[0] ?? 'Destaque'}</span>
                 <a href={href('#')}>
                   <img
-                    src={posts[0]?.image ?? `https://picsum.photos/seed/${c.businessName}/900/510`}
+                    src={fotoOu(p, 900, 510, posts[0]?.image, c.heroImage, c.aboutImage)}
                     alt={posts[0]?.title ?? c.businessName}
                   />
                 </a>
@@ -194,10 +195,18 @@ export default function MagazineLayout({ c, p, preview }: { c: SiteContent; p: P
 
           {/* LAYOUT PRINCIPAL: artigos + serviços sidebar */}
           <div className="mag-layout mag-block">
-            <section id="prevencao">
-              <div className="mag-sec-label">
-                Conteúdo &amp; Serviços <a className="mag-more" href={href('#')}>Ver tudo <Icon name="arrow-right" size={13} /></a>
-              </div>
+            <section id="sobre">
+              <div className="mag-sec-label">Sobre {c.businessName}</div>
+              <p style={{ fontFamily: 'var(--serif)', fontSize: '1.15rem', lineHeight: 1.7, margin: '0 0 2rem' }}>{c.about}</p>
+              {(c.testimonials ?? []).slice(0, 2).map((t, i) => (
+                <blockquote key={i} style={{ margin: '0 0 1.5rem', paddingLeft: '1.2rem', borderLeft: '3px solid var(--sp)' }}>
+                  <p style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: '1.05rem', lineHeight: 1.6, margin: '0 0 .4rem' }}>&ldquo;{t.text}&rdquo;</p>
+                  <cite style={{ fontStyle: 'normal', fontSize: '.85rem', fontWeight: 700 }}>{t.name}</cite>
+                </blockquote>
+              ))}
+              {posts.length > 0 && (
+                <div className="mag-sec-label" style={{ marginTop: '2rem' }}>Do blog</div>
+              )}
               <div className="mag-articles">
                 {posts.slice(0, 4).map((post, i) => (
                   <article key={i} className="mag-art">
@@ -208,7 +217,7 @@ export default function MagazineLayout({ c, p, preview }: { c: SiteContent; p: P
                     <span className="mag-tag">{post.title.split(' ').slice(0, 2).join(' ')}</span>
                     <h3><a href={href('#')}>{post.title}</a></h3>
                     <p>{post.excerpt}</p>
-                    <div className="mag-by">{c.businessName} · 6 min</div>
+                    <div className="mag-by">{c.businessName}</div>
                   </article>
                 ))}
               </div>
@@ -227,17 +236,19 @@ export default function MagazineLayout({ c, p, preview }: { c: SiteContent; p: P
                 ))}
               </div>
 
-              <div className="mag-ad">
-                <span className="mag-ad-label">Em números</span>
-                <div className="mag-stat">{c.yearsExperience}+</div>
-                <p>anos de experiência em {c.city}</p>
-              </div>
+              {c.yearsExperience > 0 && (
+                <div className="mag-ad">
+                  <span className="mag-ad-label">Em números</span>
+                  <div className="mag-stat">{c.yearsExperience}+</div>
+                  <p>anos de experiência em {c.city}</p>
+                </div>
+              )}
 
               <div className="mag-svc-box mag-solid mag-box-cta" style={{ marginTop: '1.5rem' }}>
                 <h3>{c.ctaLabel}</h3>
                 <p>Atendimento em {c.city}. Fale com a gente.</p>
                 <a href={href(whatsapp)} className="mag-wa">
-                  <Icon name="whatsapp" size={16} /> Agendar no WhatsApp
+                  <Icon name="whatsapp" size={16} /> Chamar no WhatsApp
                 </a>
               </div>
             </aside>
@@ -249,7 +260,7 @@ export default function MagazineLayout({ c, p, preview }: { c: SiteContent; p: P
           <div className="mag-wrap">
             <div className="mag-specs-inner">
               <div className="mag-sec-label" style={{ border: 0, justifyContent: 'center', marginBottom: '1.5rem' }}>
-                Especialidades em {c.city}
+                Serviços em {c.city}
               </div>
               <div className={`mag-specs-grid ${specsCols}`}>
                 {services.map((svc, i) => (
@@ -287,9 +298,8 @@ export default function MagazineLayout({ c, p, preview }: { c: SiteContent; p: P
               <p>{c.ctaPhone} · {c.email}</p>
             </div>
             <div>
-              <h4>Horários</h4>
-              <p>Seg–Sex · 8h às 18h</p>
-              <p>Sábado · consultar</p>
+              <h4>Localização</h4>
+              <p>{c.city}{c.state ? `/${c.state}` : ''}</p>
             </div>
             <div>
               <h4>Serviços</h4>

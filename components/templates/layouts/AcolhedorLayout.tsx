@@ -2,6 +2,7 @@ import type { SiteContent } from '@/lib/templates/example-content'
 import SiteBrand from '../shared/SiteBrand'
 import Icon from '../shared/Icon'
 import type { PaletteColors } from '@/lib/templates/palettes'
+import { fotoOu } from '@/lib/templates/foto'
 import SiteAnswer from '../shared/SiteAnswer'
 
 function cssVars(p: PaletteColors) {
@@ -142,10 +143,10 @@ export default function AcolhedorLayout({ c, p, preview: _preview }: { c: SiteCo
           <a className="brand" href="#"><SiteBrand c={c}>{c.businessName.split(' ')[0]} <em>{c.businessName.split(' ').slice(1).join(' ')}</em></SiteBrand></a>
           <div className="nav-links">
             <a href="#historia">Nossa história</a>
-            <a href="#equipe">Equipe</a>
+            {team.length > 0 && <a href="#equipe">Equipe</a>}
             {blogPosts.length > 0 && <a href="#blog">Blog</a>}
             <a href="#duvidas">Dúvidas</a>
-            <a className="btn" href={whatsapp} style={{ padding: '.6rem 1.5rem', fontSize: '.95rem' }}>Agendar</a>
+            <a className="btn" href={whatsapp} style={{ padding: '.6rem 1.5rem', fontSize: '.95rem' }}>Fale conosco</a>
           </div>
         </div>
       </nav>
@@ -155,10 +156,10 @@ export default function AcolhedorLayout({ c, p, preview: _preview }: { c: SiteCo
         <div className="wrap">
           <img
             className="avatar"
-            src={c.heroImage ?? `https://picsum.photos/seed/${c.businessName}-av/240/240`}
+            src={fotoOu(p, 240, 240, c.heroImage, c.aboutImage)}
             alt={`${c.businessName}, ${c.city}/${c.state}`}
           />
-          <span className="kicker">{c.tagline || `${c.city}/${c.state}`}</span>
+          <span className="kicker">{c.tagline && c.tagline !== c.heroSub ? c.tagline : `${c.city}${c.state ? `/${c.state}` : ''}`}</span>
           <h1>{c.heroHeadline}</h1>
           <p>{c.heroSub}</p>
           <SiteAnswer text={c.heroAnswer} />
@@ -187,7 +188,7 @@ export default function AcolhedorLayout({ c, p, preview: _preview }: { c: SiteCo
             <p>{c.about}</p>
             {c.yearsExperience > 0 && (
               <p>
-                Com {c.yearsExperience} anos de experiência em {c.city}, construímos uma trajetória baseada em resultados reais e atendimento humano. Cada cliente que passa por aqui é tratado como prioridade, porque acreditamos que cuidar é o motivo de existir.
+                São {c.yearsExperience} anos atendendo em {c.city}.
               </p>
             )}
             <div className="sign">
@@ -197,40 +198,14 @@ export default function AcolhedorLayout({ c, p, preview: _preview }: { c: SiteCo
           </div>
         </section>
 
-        {/* VALORES */}
-        <section className="block" id="valores">
-          <div className="wrap">
-            <div className="head">
-              <span className="kicker">Como cuidamos</span>
-              <h2>O que a gente não abre mão</h2>
-            </div>
-            <div className="values">
-              <div className="value">
-                <div className="ic"><Icon name="chat" size={38} /></div>
-                <h3>Tempo de ouvir</h3>
-                <p>Atendimento sem pressa para entender você por inteiro, sem relógio em cima.</p>
-              </div>
-              <div className="value">
-                <div className="ic"><Icon name="leaf" size={38} /></div>
-                <h3>Cuidado contínuo</h3>
-                <p>Histórico completo compartilhado entre os profissionais. Você nunca recomeça do zero.</p>
-              </div>
-              <div className="value">
-                <div className="ic"><Icon name="heart" size={38} /></div>
-                <h3>Acolhimento real</h3>
-                <p>Da recepção ao atendimento, um ambiente pensado para você se sentir em casa.</p>
-              </div>
-            </div>
-          </div>
-        </section>
 
         {/* EQUIPE */}
         {team.length > 0 && (
           <section className="block" id="equipe" style={{ background: 'var(--sf)' }}>
             <div className="wrap">
               <div className="head">
-                <span className="kicker">Quem vai te receber</span>
-                <h2>Pessoas que escolheram cuidar de gente</h2>
+                <span className="kicker">Equipe</span>
+                <h2>Quem faz {c.businessName}</h2>
               </div>
               <div className="team">
                 {team.map((member, i) => (
@@ -270,7 +245,7 @@ export default function AcolhedorLayout({ c, p, preview: _preview }: { c: SiteCo
         {featured && (
           <section className="testi">
             <div className="narrow">
-              <img className="av" src={`https://picsum.photos/seed/av-${featured.name}/120/120`} alt={featured.name} />
+              {featured.photoUrl && <img className="av" src={featured.photoUrl} alt={featured.name} />}
               <blockquote>&quot;{featured.text}&quot;</blockquote>
               <cite>{featured.name}</cite>
             </div>
@@ -324,8 +299,8 @@ export default function AcolhedorLayout({ c, p, preview: _preview }: { c: SiteCo
         <section className="cta" id="contato">
           <div className="wrap narrow">
             <span className="kicker">Vamos conversar</span>
-            <h2>O primeiro passo pode ser hoje</h2>
-            <p>Sem compromisso. A primeira conversa é só pra gente se conhecer e cuidar de você do jeito certo.</p>
+            <h2>Fale com {c.businessName}</h2>
+            <p>Mande sua mensagem pelo WhatsApp e tire suas dúvidas direto com a gente.</p>
             <a href={whatsapp} className="btn">Falar com a gente no WhatsApp</a>
           </div>
         </section>
@@ -348,12 +323,12 @@ export default function AcolhedorLayout({ c, p, preview: _preview }: { c: SiteCo
             <div>
               <h4>Navegue</h4>
               <a href="#historia">Nossa história</a>
-              <a href="#equipe">Equipe</a>
+              {team.length > 0 && <a href="#equipe">Equipe</a>}
               <a href="#duvidas">Dúvidas</a>
               <a href="#contato">Contato</a>
             </div>
             <div>
-              <h4>Responsável</h4>
+              <h4>Empresa</h4>
               <p>{c.businessName}</p>
               {c.credential && <p>{c.credential}</p>}
             </div>

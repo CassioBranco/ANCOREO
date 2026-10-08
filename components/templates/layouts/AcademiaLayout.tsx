@@ -2,7 +2,9 @@ import type { SiteContent } from '@/lib/templates/example-content'
 import SiteBrand from '../shared/SiteBrand'
 import Icon from '../shared/Icon'
 import type { PaletteColors } from '@/lib/templates/palettes'
+import { fotoOu } from '@/lib/templates/foto'
 import SiteAnswer from '../shared/SiteAnswer'
+import { realStats } from '@/lib/templates/real-stats'
 
 function cssVars(p: PaletteColors) {
   return `:root{--sp:${p.primary};--ss:${p.secondary};--sa:${p.accent};--sb:${p.bg};--sf:${p.surface};--st:${p.text};--sm:${p.muted}}`
@@ -184,11 +186,13 @@ const LANG_COLORS = ['#1D4ED8', '#DC2626', '#0F766E', '#7C3AED', '#EA580C']
 
 export default function AcademiaLayout({ c, p, preview }: { c: SiteContent; p: PaletteColors; preview: boolean }) {
   const href = (url: string) => preview ? '#' : url
-  const whatsapp = `https://wa.me/${c.whatsapp}?text=Olá, tenho interesse nos cursos.`
+  const whatsapp = `https://wa.me/${c.whatsapp}?text=Olá, vim pelo site.`
   const courses = c.courses ?? []
   const posts = c.blogPosts ?? []
   const services = c.services ?? []
-  const stats = c.stats ?? []
+  // Só números reais (anos, nº de serviços, nota média dos depoimentos).
+  const stats = realStats(c)
+  const faqs = c.faqs ?? []
 
   // Headline: highlight first word with .ac-mark
   const headline = c.heroHeadline
@@ -219,11 +223,10 @@ export default function AcademiaLayout({ c, p, preview }: { c: SiteContent; p: P
             <SiteBrand c={c}>{c.businessName.split(' ')[0]}<b>{c.businessName.split(' ').slice(1).join(' ')}</b></SiteBrand>
           </a>
           <div className="ac-nav-links">
-            <a href="#idiomas">Idiomas</a>
-            <a href="#metodo">Método</a>
-            <a href="#turmas">Turmas</a>
-            <a href="#blog">Blog</a>
-            <a href={href(whatsapp)} className="ac-btn ac-btn-amber">Matricule-se</a>
+            {services.length > 0 && <a href="#servicos">Serviços</a>}
+            {posts.length > 0 && <a href="#blog">Blog</a>}
+            {faqs.length > 0 && <a href="#duvidas">Dúvidas</a>}
+            <a href={href(whatsapp)} className="ac-btn ac-btn-amber">Fale conosco</a>
           </div>
         </div>
       </nav>
@@ -232,44 +235,41 @@ export default function AcademiaLayout({ c, p, preview }: { c: SiteContent; p: P
       <header className="ac-hero">
         <div className="ac-wrap">
           <div>
-            <span className="ac-kicker">{c.city}/{c.state} · escola de idiomas</span>
+            <span className="ac-kicker">{c.city}{c.state ? `/${c.state}` : ''}</span>
             <h1>
               {firstWord && <span className="ac-mark">{firstWord}</span>}{restWords ? ` ${restWords}` : ''}
             </h1>
             <p>{c.heroSub}</p>
             <SiteAnswer text={c.heroAnswer} />
             <div className="ac-hero-cta">
-              <a href="#turmas" className="ac-btn">Ver turmas e idiomas</a>
-              <a href={href(whatsapp)} className="ac-btn ac-btn-ghost">Agendar aula grátis</a>
+              {services.length > 0 && <a href="#servicos" className="ac-btn">Ver os serviços</a>}
+              <a href={href(whatsapp)} className="ac-btn ac-btn-ghost">Fale no WhatsApp</a>
             </div>
           </div>
           <div className="ac-hero-art">
             <img
-              src={c.heroImage ?? `https://picsum.photos/seed/academia-hero/620/780`}
-              alt={`Aula de idiomas em grupo — ${c.businessName}`}
+              src={fotoOu(p, 620, 780, c.heroImage, c.aboutImage)}
+              alt={`${c.businessName} em ${c.city}`}
               loading="eager"
             />
-            <div className="ac-sticker">
-              1ª aula<br />grátis<span>sem compromisso</span>
-            </div>
-            <div className="ac-chip">
-              <Icon name="chat" size={16} /> Conversa desde o dia 1
-            </div>
           </div>
         </div>
 
         {/* MARQUEE */}
-        <div className="ac-greet" aria-hidden="true">
-          <div className="ac-track">
-            Hello <span className="ac-sep">✸</span> Hola <span className="ac-sep">✸</span> Bonjour <span className="ac-sep">✸</span> Ciao <span className="ac-sep">✸</span> Hallo <span className="ac-sep">✸</span> Olá <span className="ac-sep">✸</span>
-            Hello <span className="ac-sep">✸</span> Hola <span className="ac-sep">✸</span> Bonjour <span className="ac-sep">✸</span> Ciao <span className="ac-sep">✸</span> Hallo <span className="ac-sep">✸</span> Olá <span className="ac-sep">✸</span>
+        {services.length > 0 && (
+          <div className="ac-greet" aria-hidden="true">
+            <div className="ac-track">
+              {[0, 1].map(k => services.map((svc, i) => (
+                <span key={`${k}-${i}`}>{svc.name} <span className="ac-sep">✸</span> </span>
+              )))}
+            </div>
           </div>
-        </div>
+        )}
       </header>
 
       <main>
         {/* STATS */}
-        {stats.length > 0 && (
+        {stats.length >= 2 && (
           <section className="ac-block ac-stats">
             <div className="ac-wrap">
               {stats.map((s, i) => (
@@ -282,13 +282,13 @@ export default function AcademiaLayout({ c, p, preview }: { c: SiteContent; p: P
           </section>
         )}
 
-        {/* IDIOMAS / SERVIÇOS COLOR BLOCKS */}
-        <section className="ac-block" id="idiomas">
+        {/* SERVIÇOS COLOR BLOCKS */}
+        {services.length > 0 && (
+        <section className="ac-block" id="servicos">
           <div className="ac-wrap">
             <div className="ac-head">
-              <span className="ac-kicker">Escolha o seu</span>
-              <h2>{services.length > 1 ? 'Idiomas que transformam carreiras' : c.businessName}</h2>
-              <p>Do nível zero ao avançado, com certificado de conclusão em cada etapa.</p>
+              <span className="ac-kicker">O que oferecemos</span>
+              <h2>{c.businessName}{c.city ? ` em ${c.city}` : ''}</h2>
             </div>
             <div className="ac-langs">
               {services.map((svc, i) => (
@@ -298,57 +298,25 @@ export default function AcademiaLayout({ c, p, preview }: { c: SiteContent; p: P
                   style={{ background: LANG_COLORS[i % LANG_COLORS.length] }}
                 >
                   <div>
-                    <div className="ac-greet-w">{svc.name.toLowerCase().split(' ')[0]}</div>
-                    <div className="ac-big">{svc.name.slice(0, 2)}</div>
-                  </div>
-                  <div>
                     <h3>{svc.name}</h3>
-                    <div className="ac-lvl">{svc.description.split('.')[0]}</div>
+                    {svc.description && <div className="ac-lvl">{svc.description.split('.')[0]}</div>}
                   </div>
                 </div>
               ))}
             </div>
           </div>
         </section>
+        )}
 
-        {/* MÉTODO TIMELINE */}
-        <section className="ac-block ac-method" id="metodo">
+
+        {/* CURSOS (só quando o negócio cadastrou cursos) */}
+        {courses.length > 0 && (
+        <section className="ac-block" id="cursos">
           <div className="ac-wrap">
             <div className="ac-head">
-              <span className="ac-kicker">Como funciona</span>
-              <h2>O método <span className="ac-mark">Fala Logo</span></h2>
-              <p>Sem anos enchendo caderno de gramática. Você conversa desde o primeiro dia.</p>
+              <span className="ac-kicker">Cursos</span>
+              <h2>Escolha o que combina com você</h2>
             </div>
-            <div className="ac-method-grid">
-              <div className="ac-mstep">
-                <h3>Nivelamento grátis</h3>
-                <p>Um bate-papo de 15 minutos para descobrir o seu nível real, sem prova chata.</p>
-              </div>
-              <div className="ac-mstep">
-                <h3>Turma certa</h3>
-                <p>Você entra numa turma de até 6 pessoas no seu nível e com o seu objetivo.</p>
-              </div>
-              <div className="ac-mstep">
-                <h3>Conversa real</h3>
-                <p>80% da aula é você falando. Situações do dia a dia, viagem e trabalho.</p>
-              </div>
-              <div className="ac-mstep">
-                <h3>Certificado</h3>
-                <p>Avaliações leves e certificado de conclusão a cada nível concluído.</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* TURMAS / CURSOS */}
-        <section className="ac-block" id="turmas">
-          <div className="ac-wrap">
-            <div className="ac-head">
-              <span className="ac-kicker">Turmas abertas</span>
-              <h2>Escolha a modalidade que cabe na sua rotina</h2>
-              <p>Mesma qualidade de ensino, do jeito que funciona para você.</p>
-            </div>
-            {courses.length > 0 ? (
               <div className="ac-courses">
                 {courses.map((course, i) => (
                   <article key={i} className="ac-course">
@@ -360,53 +328,29 @@ export default function AcademiaLayout({ c, p, preview }: { c: SiteContent; p: P
                       <h3>{course.name}</h3>
                       <p>{course.description}</p>
                       <div className="ac-meta">
-                        <span><Icon name="clock" size={15} /> {course.hours}h</span>
-                        <span><Icon name="users" size={15} /> até 6 alunos</span>
+                        {course.hours ? <span><Icon name="clock" size={15} /> {course.hours}h</span> : null}
                       </div>
                       <div className="ac-cfoot">
-                        <a href={href(whatsapp)} className="ac-btn">Quero me matricular</a>
+                        <a href={href(whatsapp)} className="ac-btn">Quero saber mais</a>
                       </div>
                     </div>
                   </article>
                 ))}
               </div>
-            ) : (
-              /* Fallback: services as course cards */
-              <div className="ac-courses">
-                {services.map((svc, i) => (
-                  <article key={i} className="ac-course">
-                    <div className="ac-ctop">
-                      <span style={{ fontSize: '1.8rem' }}>{svc.image ? <img src={svc.image} alt="" style={{ width: 40, height: 40, borderRadius: 8, objectFit: 'cover', display: 'block' }} /> : svc.icon}</span>
-                      <span className="ac-modality ac-m-pres">Presencial</span>
-                    </div>
-                    <div className="ac-cbody">
-                      <h3>{svc.name}</h3>
-                      <p>{svc.description}</p>
-                      <div className="ac-meta">
-                        <span><Icon name="clock" size={15} /> 2x/semana</span>
-                        <span><Icon name="users" size={15} /> até 6 alunos</span>
-                      </div>
-                      <div className="ac-cfoot">
-                        <a href={href(whatsapp)} className="ac-btn">Quero me matricular</a>
-                      </div>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            )}
           </div>
         </section>
+        )}
 
         {/* DEPOIMENTO DESTAQUE — bestTestimonial tem fallback vazio, então
             guarda pelo .text pra não renderizar seção sem depoimento real */}
         {bestTestimonial.text && (
           <section className="ac-testi">
             <div className="ac-wrap">
-              <span className="ac-kicker" style={{ color: 'var(--sa)' }}>Quem estudou, fala</span>
+              <span className="ac-kicker" style={{ color: 'var(--sa)' }}>Depoimento</span>
               <blockquote>
                 &quot;{bestTestimonial.text.split(' ').slice(0, 6).join(' ')} <span className="ac-mark">{bestTestimonial.text.split(' ').slice(6, 10).join(' ')}</span> {bestTestimonial.text.split(' ').slice(10).join(' ')}&quot;
               </blockquote>
-              <cite>{bestTestimonial.name} · aluno</cite>
+              <cite>{bestTestimonial.name}</cite>
             </div>
           </section>
         )}
@@ -416,18 +360,17 @@ export default function AcademiaLayout({ c, p, preview }: { c: SiteContent; p: P
           <section className="ac-block" id="blog">
             <div className="ac-wrap">
               <div className="ac-head">
-                <span className="ac-kicker">Blog · Dicas de idiomas</span>
-                <h2>Aprenda mais rápido</h2>
+                <span className="ac-kicker">Blog</span>
+                <h2>Do nosso blog</h2>
               </div>
               <div className="ac-post-grid">
                 {posts.slice(0, 3).map((post, i) => (
                   <a key={i} className="ac-post" href={href('#')}>
-                    <img src={post.image} alt={post.title} />
+                    {post.image && <img src={post.image} alt={post.title} />}
                     <div className="ac-pbody">
-                      <span className="ac-cat">Método</span>
                       <h3>{post.title}</h3>
                       <p>{post.excerpt}</p>
-                      <span className="ac-by">{c.businessName} · 5 min</span>
+                      <span className="ac-by">{post.date || c.businessName}</span>
                     </div>
                   </a>
                 ))}
@@ -437,14 +380,15 @@ export default function AcademiaLayout({ c, p, preview }: { c: SiteContent; p: P
         )}
 
         {/* FAQ */}
+        {faqs.length > 0 && (
         <section className="ac-block" id="duvidas" style={{ background: 'var(--sf)' }}>
           <div className="ac-wrap">
             <div className="ac-head ac-center">
               <span className="ac-kicker">Dúvidas frequentes</span>
-              <h2>Antes de matricular</h2>
+              <h2>O que você precisa saber</h2>
             </div>
             <div className="ac-faq">
-              {(c.faqs ?? []).map((faq, i) => (
+              {faqs.map((faq, i) => (
                 <details key={i}>
                   <summary>{faq.question}</summary>
                   <p>{faq.answer}</p>
@@ -453,16 +397,17 @@ export default function AcademiaLayout({ c, p, preview }: { c: SiteContent; p: P
             </div>
           </div>
         </section>
+        )}
 
         {/* CTA */}
         <section className="ac-block ac-cta" id="contato">
           <div className="ac-wrap">
             <div className="ac-cta-box">
-              <span className="ac-kicker" style={{ color: 'var(--sa)' }}>Bora começar</span>
-              <h2>Sua primeira aula é <span className="ac-mark">grátis</span></h2>
-              <p>Agende o nivelamento sem compromisso e sinta como é aprender conversando.</p>
+              <span className="ac-kicker" style={{ color: 'var(--sa)' }}>Contato</span>
+              <h2>Fale com <span className="ac-mark">{c.businessName}</span></h2>
+              <p>Mande sua mensagem pelo WhatsApp e tire suas dúvidas direto com a gente.</p>
               <a href={href(whatsapp)} className="ac-btn ac-btn-amber" style={{ padding: '1.1rem 2.4rem', fontSize: '1.05rem' }}>
-                <Icon name="whatsapp" size={18} /> Agendar aula grátis
+                <Icon name="whatsapp" size={18} /> {c.ctaLabel}
               </a>
             </div>
           </div>
@@ -475,26 +420,27 @@ export default function AcademiaLayout({ c, p, preview }: { c: SiteContent; p: P
           <div className="ac-foot-grid">
             <div>
               <h4>{c.businessName}</h4>
-              <p>{c.address}</p>
-              <p>{c.ctaPhone} · {c.email}</p>
+              {c.address && <p>{c.address}</p>}
+              {(c.ctaPhone || c.email) && <p>{[c.ctaPhone, c.email].filter(Boolean).join(' · ')}</p>}
             </div>
-            <div>
-              <h4>Idiomas</h4>
-              {services.slice(0, 5).map((svc, i) => (
-                <p key={i}>{svc.name}</p>
-              ))}
-            </div>
+            {services.length > 0 && (
+              <div>
+                <h4>Serviços</h4>
+                {services.slice(0, 5).map((svc, i) => (
+                  <p key={i}>{svc.name}</p>
+                ))}
+              </div>
+            )}
             <div>
               <h4>Navegue</h4>
-              <a href="#idiomas">Idiomas</a>
-              <a href="#metodo">Método</a>
-              <a href="#blog">Blog</a>
-              <a href="#duvidas">Dúvidas</a>
+              {services.length > 0 && <a href="#servicos">Serviços</a>}
+              {posts.length > 0 && <a href="#blog">Blog</a>}
+              {faqs.length > 0 && <a href="#duvidas">Dúvidas</a>}
+              <a href="#contato">Contato</a>
             </div>
             <div>
-              <h4>Atendimento</h4>
-              <p>Seg a Sex · 8h às 21h</p>
-              <p>Sábado · 9h às 13h</p>
+              <h4>Localização</h4>
+              <p>{c.city}{c.state ? `/${c.state}` : ''}</p>
               {c.credential && <p>{c.credential}</p>}
             </div>
           </div>

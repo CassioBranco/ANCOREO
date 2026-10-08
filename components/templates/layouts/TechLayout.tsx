@@ -2,6 +2,8 @@ import type { SiteContent } from '@/lib/templates/example-content'
 import SiteBrand from '../shared/SiteBrand'
 import Icon from '../shared/Icon'
 import type { PaletteColors } from '@/lib/templates/palettes'
+import { realStats, notaMedia } from '@/lib/templates/real-stats'
+import { fotoOu } from '@/lib/templates/foto'
 import SiteFAQ from '../shared/SiteFAQ'
 import SiteBlog from '../shared/SiteBlog'
 import SiteFooter from '../shared/SiteFooter'
@@ -61,12 +63,8 @@ export default function TechLayout({ c, p, preview }: { c: SiteContent; p: Palet
   }
 
   const services = c.services ?? []
-  const stats = c.stats ?? [
-    { value: `${c.yearsExperience}+`, label: 'Anos de experiência' },
-    { value: '200+', label: 'Clientes atendidos' },
-    { value: '4.9★', label: 'Avaliação média' },
-    { value: '100+', label: 'Avaliações' },
-  ]
+  // Só números reais: nada de "200+ clientes" inventado.
+  const stats = realStats(c)
 
   const colorCycle = ['var(--sa)', 'var(--ss)', 'var(--sp)'] as const
 
@@ -88,8 +86,13 @@ export default function TechLayout({ c, p, preview }: { c: SiteContent; p: Palet
               <SiteBrand c={c}>{c.businessName.split(' ')[0]}<span style={gradText}>.</span></SiteBrand>
             </span>
             <div style={{ display: 'flex', gap: '2rem', alignItems: 'center', fontSize: '.92rem', color: 'var(--sm)' }}>
-              {['Serviços', 'Sobre', 'Blog', 'Dúvidas'].map(item => (
-                <a key={item} href="#" style={{ textDecoration: 'none', color: 'inherit' }}>{item}</a>
+              {([
+                services.length > 0 ? ['Serviços', '#servicos'] : null,
+                ['Sobre', '#sobre'],
+                (c.blogPosts?.length ?? 0) > 0 ? ['Blog', '#blog'] : null,
+                (c.faqs?.length ?? 0) > 0 ? ['Dúvidas', '#duvidas'] : null,
+              ].filter(Boolean) as string[][]).map(([label, anchor]) => (
+                <a key={label} href={anchor} style={{ textDecoration: 'none', color: 'inherit' }}>{label}</a>
               ))}
               <a href={href(whatsapp)} style={{ ...btn, padding: '.6rem 1.4rem', fontSize: '.9rem' }}>
                 {c.ctaLabel}
@@ -110,7 +113,7 @@ export default function TechLayout({ c, p, preview }: { c: SiteContent; p: Palet
               <h1 style={{ ...heading, fontSize: 'clamp(3rem, 7.5vw, 6rem)', lineHeight: .96, letterSpacing: '-0.03em', margin: '1.3rem 0 1.4rem' }}>
                 {c.heroHeadline.split(/[,.]|–/)[0]?.trim() || c.heroHeadline}{' '}
                 <span style={gradText}>
-                  {c.heroHeadline.split(/[,.]|–/)[1]?.trim() || c.city}
+                  {c.heroHeadline.split(/[,.]|–/)[1]?.trim() || (c.city && !c.heroHeadline.includes(c.city) ? c.city : '')}
                 </span>
               </h1>
               <p style={{ fontSize: '1.25rem', color: 'var(--sm)', lineHeight: 1.6, margin: '0 0 2.2rem', maxWidth: '30rem' }}>
@@ -119,21 +122,23 @@ export default function TechLayout({ c, p, preview }: { c: SiteContent; p: Palet
               <SiteAnswer text={c.heroAnswer} />
               <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
                 <a href={href(whatsapp)} style={btn}>{c.ctaLabel} <Icon name="arrow-right" size={17} /></a>
-                <a href={href(`tel:${c.ctaPhone.replace(/\D/g, '')}`)} style={btnGhost}>{c.ctaPhone}</a>
+                {c.ctaPhone && <a href={href(`tel:${c.ctaPhone.replace(/\D/g, '')}`)} style={btnGhost}>{c.ctaPhone}</a>}
               </div>
             </div>
 
             {/* Hero card */}
             <div style={{ position: 'relative', aspectRatio: '3/4', borderRadius: '28px', overflow: 'hidden', boxShadow: '0 30px 60px color-mix(in srgb, var(--sp) 30%, transparent)' }}>
               <img
-                src={c.heroImage ?? `https://picsum.photos/seed/${c.businessName}-hero/640/854`}
+                src={fotoOu(p, 640, 854, c.heroImage, c.aboutImage)}
                 alt={`${c.businessName} – ${c.city}`}
                 width={640} height={854}
                 style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
               />
-              <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, padding: '1.6rem', background: 'linear-gradient(to top, rgb(0 0 0 / .8), transparent)', fontWeight: 700, fontSize: '1.1rem' }}>
-                <span style={{ color: 'var(--sa)' }}>+{c.yearsExperience * 10}</span> clientes atendidos ✦
-              </div>
+              {c.yearsExperience > 0 && (
+                <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, padding: '1.6rem', background: 'linear-gradient(to top, rgb(0 0 0 / .8), transparent)', fontWeight: 700, fontSize: '1.1rem' }}>
+                  <span style={{ color: 'var(--sa)' }}>{c.yearsExperience} anos</span>{c.city ? ` em ${c.city}` : ''} ✦
+                </div>
+              )}
             </div>
           </div>
         </header>
@@ -145,15 +150,16 @@ export default function TechLayout({ c, p, preview }: { c: SiteContent; p: Palet
               {services.map((svc, i) => (
                 <div key={i}>{svc.name} <span style={{ color: 'var(--ss)' }}>✦</span></div>
               ))}
-              <div>{c.city}/{c.state} <span style={{ color: 'var(--ss)' }}>✦</span></div>
+              {c.city && <div>{c.city}{c.state ? `/${c.state}` : ''} <span style={{ color: 'var(--ss)' }}>✦</span></div>}
             </div>
           </div>
         </div>
 
-        {/* STATS — 4 colunas */}
+        {/* STATS — 4 colunas (só com dado real) */}
+        {stats.length >= 2 && (
         <section style={{ padding: '6rem 0', position: 'relative' }}>
           <div style={wrap}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.max(1, Math.min(4, stats.length))}, 1fr)`, gap: '1.5rem' }}>
               {stats.slice(0, 4).map((s, i) => (
                 <div key={i} style={{ textAlign: 'center', padding: '1.5rem', border: '1px solid var(--line)', borderRadius: '20px', backgroundColor: 'var(--sf)' }}>
                   <div style={{ ...heading, fontSize: 'clamp(2rem, 4vw, 3rem)', ...gradText }}>{s.value}</div>
@@ -163,18 +169,22 @@ export default function TechLayout({ c, p, preview }: { c: SiteContent; p: Palet
             </div>
           </div>
         </section>
+        )}
 
         {/* SERVIÇOS — masonry */}
-        <section style={{ padding: '6rem 0', position: 'relative' }}>
+        {services.length > 0 && (
+        <section id="servicos" style={{ padding: '6rem 0', position: 'relative' }}>
           <div style={wrap}>
             <div style={{ marginBottom: '3rem' }}>
-              <span style={kicker}>Os serviços</span>
+              <span style={kicker}>Serviços</span>
               <h2 style={{ ...heading, fontSize: 'clamp(2.2rem, 5vw, 3.6rem)', margin: '.8rem 0 .6rem', lineHeight: 1.02, letterSpacing: '-0.02em' }}>
-                Escolha o seu <span style={gradText}>caminho</span>
+                O que <span style={gradText}>fazemos</span>
               </h2>
-              <p style={{ color: 'var(--sm)', fontSize: '1.1rem', margin: 0 }}>
-                Cada serviço, uma forma diferente de entregar resultado em {c.city}.
-              </p>
+              {c.city && (
+                <p style={{ color: 'var(--sm)', fontSize: '1.1rem', margin: 0 }}>
+                  Atendimento em {c.city} e região.
+                </p>
+              )}
             </div>
 
             {/* Masonry — 3 colunas */}
@@ -199,10 +209,12 @@ export default function TechLayout({ c, p, preview }: { c: SiteContent; p: Palet
             </div>
           </div>
         </section>
+        )}
 
-        {/* SOBRE — grid 1/1 */}
-        <section style={{ padding: '6rem 0', position: 'relative' }}>
-          <div style={{ ...wrap, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4rem', alignItems: 'center' }}>
+        {/* SOBRE — grid 1/1 (imagem só quando o dono subiu) */}
+        <section id="sobre" style={{ padding: '6rem 0', position: 'relative' }}>
+          <div style={{ ...wrap, display: 'grid', gridTemplateColumns: c.aboutImage ? '1fr 1fr' : '1fr', maxWidth: c.aboutImage ? undefined : '820px', gap: '4rem', alignItems: 'center' }}>
+            {c.aboutImage && (
             <div style={{ position: 'relative' }}>
               {/* Glow atrás da imagem */}
               <div style={{ position: 'absolute', top: '-40px', left: '-40px', width: '340px', height: '340px', borderRadius: '50%', background: 'var(--sa)', filter: 'blur(90px)', opacity: .35, zIndex: 0, pointerEvents: 'none' }} />
@@ -214,10 +226,11 @@ export default function TechLayout({ c, p, preview }: { c: SiteContent; p: Palet
                 loading="lazy"
               />
             </div>
+            )}
             <div>
-              <span style={kicker}>Sobre {c.businessName}</span>
+              <span style={kicker}>Sobre</span>
               <h2 style={{ ...heading, fontSize: 'clamp(2rem, 4vw, 3rem)', letterSpacing: '-0.02em', lineHeight: 1.05, margin: '.8rem 0 1.2rem' }}>
-                Um lugar pra <span style={gradText}>crescer sem medo</span>
+                {c.businessName}
               </h2>
               <p style={{ color: 'var(--sm)', lineHeight: 1.7, margin: '0 0 1.4rem' }}>{c.about}</p>
               {c.credential && (
@@ -241,7 +254,7 @@ export default function TechLayout({ c, p, preview }: { c: SiteContent; p: Palet
             <div style={{ position: 'absolute', left: '50%', top: 0, transform: 'translateX(-50%)', width: '380px', height: '380px', borderRadius: '50%', background: 'var(--ss)', filter: 'blur(90px)', opacity: .4, zIndex: 0, pointerEvents: 'none' }} />
             <div style={{ ...wrap }}>
               <div style={{ position: 'relative', zIndex: 2, maxWidth: '880px', margin: '0 auto', textAlign: 'center' }}>
-                <span style={kicker}>Quem atendemos, aprova</span>
+                <span style={kicker}>Quem já é cliente</span>
                 <blockquote style={{ ...heading, fontSize: 'clamp(1.6rem, 4vw, 2.8rem)', lineHeight: 1.2, letterSpacing: '-0.02em', margin: '1.4rem 0 1.6rem' }}>
                   &ldquo;{c.testimonials[0]!.text}&rdquo;
                 </blockquote>
@@ -253,21 +266,21 @@ export default function TechLayout({ c, p, preview }: { c: SiteContent; p: Palet
           </section>
         )}
 
-        <SiteBlog c={c} dark />
-        <SiteFAQ c={c} dark />
+        <div id="blog"><SiteBlog c={c} dark /></div>
+        <div id="duvidas"><SiteFAQ c={c} dark /></div>
 
         {/* CTA FINAL */}
-        <section style={{ padding: '6rem 0', position: 'relative', textAlign: 'center' }}>
+        <section id="contato" style={{ padding: '6rem 0', position: 'relative', textAlign: 'center' }}>
           {/* Glows */}
           <div style={{ position: 'absolute', left: '50%', top: 0, transform: 'translateX(-50%)', width: '420px', height: '420px', borderRadius: '50%', background: 'var(--sp)', filter: 'blur(90px)', opacity: .5, zIndex: 0, pointerEvents: 'none' }} />
           <div style={{ position: 'absolute', right: '10%', bottom: 0, width: '340px', height: '340px', borderRadius: '50%', background: 'var(--sa)', filter: 'blur(90px)', opacity: .35, zIndex: 0, pointerEvents: 'none' }} />
           <div style={{ ...wrap, position: 'relative', zIndex: 2 }}>
-            <span style={kicker}>Bora?</span>
+            <span style={kicker}>Contato</span>
             <h2 style={{ ...heading, fontSize: 'clamp(2.4rem, 6.5vw, 5rem)', letterSpacing: '-0.03em', lineHeight: .98, margin: '.8rem 0 1.4rem' }}>
-              Sua primeira consulta<br /><span style={gradText}>é por nossa conta.</span>
+              Vamos conversar?<br /><span style={gradText}>Fale com a gente.</span>
             </h2>
             <p style={{ color: 'var(--sm)', fontSize: '1.2rem', margin: '0 0 2.4rem' }}>
-              Atendemos em {c.city} e região. Agende agora e venha sentir a diferença.
+              {c.city ? `Atendemos em ${c.city} e região. ` : ''}Mande sua mensagem pelo WhatsApp.
             </p>
             <a href={href(whatsapp)} style={{ ...btn, padding: '1.2rem 3rem', fontSize: '1.1rem' }}>
               {c.ctaLabel} no WhatsApp <Icon name="arrow-right" size={18} />

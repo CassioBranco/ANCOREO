@@ -2,6 +2,8 @@ import type { SiteContent } from '@/lib/templates/example-content'
 import SiteBrand from '../shared/SiteBrand'
 import Icon from '../shared/Icon'
 import type { PaletteColors } from '@/lib/templates/palettes'
+import { realStats, notaMedia } from '@/lib/templates/real-stats'
+import { fotoOu } from '@/lib/templates/foto'
 import SiteAnswer from '../shared/SiteAnswer'
 
 function cssVars(p: PaletteColors): string {
@@ -185,6 +187,9 @@ export default function CleanLayout({ c, p, preview }: { c: SiteContent; p: Pale
   const blogPosts = c.blogPosts.slice(0, 3)
   const faqs = c.faqs.slice(0, 8)
   const stats = c.stats?.slice(0, 4) ?? []
+  const nota = notaMedia(c)
+  // Nota já aparece no selo do hero: aqui só os outros números reais.
+  const metaStats = (stats.length > 0 ? stats : realStats(c)).filter(s => !s.value.includes('★'))
 
   return (
     <>
@@ -224,43 +229,30 @@ export default function CleanLayout({ c, p, preview }: { c: SiteContent; p: Pale
             </div>
           </div>
           <figure className="cl-hero-fig">
-            <img src={c.heroImage ?? `https://picsum.photos/seed/${c.businessName}/760/950`} alt={`${c.businessName} em ${c.city}`} loading="eager" />
+            <img src={fotoOu(p, 760, 950, c.heroImage, c.aboutImage)} alt={`${c.businessName} em ${c.city}`} loading="eager" />
             <figcaption><span>{c.businessName}</span><span>{c.city}, {c.state}</span></figcaption>
-            <div className="cl-hero-rating">
-              <div className="cl-num cl-serif">{c.stats?.[3]?.value ?? '4.9'}</div>
-              <div>
-                <div className="cl-stars">{Array.from({ length: 5 }).map((_, i) => <Icon key={i} name="star" size={13} />)}</div>
-                <div className="cl-lbl">avaliações<br />no Google</div>
+            {nota && (
+              <div className="cl-hero-rating">
+                <div className="cl-num cl-serif">{nota.media}</div>
+                <div>
+                  <div className="cl-stars">{Array.from({ length: 5 }).map((_, i) => <Icon key={i} name="star" size={13} />)}</div>
+                  <div className="cl-lbl">{nota.total} {nota.total === 1 ? 'avaliação' : 'avaliações'}<br />de clientes</div>
+                </div>
               </div>
-            </div>
+            )}
           </figure>
         </div>
 
         {/* STATS — contadores reais do negócio (c.stats). Substitui a antiga
             meta row derivada; se não houver stats, cai no fallback derivado. */}
-        {stats.length > 0 ? (
+        {metaStats.length >= 2 && (
           <div className="cl-meta">
-            {stats.map((s, i) => (
+            {metaStats.map((s, i) => (
               <div key={i}>
                 <div className="cl-v cl-serif">{s.value}</div>
                 <div className="cl-k">{s.label}</div>
               </div>
             ))}
-          </div>
-        ) : (
-          <div className="cl-meta">
-            <div>
-              <div className="cl-v cl-serif">{c.yearsExperience} anos</div>
-              <div className="cl-k">de atuação</div>
-            </div>
-            <div>
-              <div className="cl-v cl-serif">{services.length} serviços</div>
-              <div className="cl-k">especializados</div>
-            </div>
-            <div>
-              <div className="cl-v cl-serif" style={{ fontSize: '1.1rem' }}>{c.credential}</div>
-              <div className="cl-k">credencial</div>
-            </div>
           </div>
         )}
       </header>
@@ -301,21 +293,21 @@ export default function CleanLayout({ c, p, preview }: { c: SiteContent; p: Pale
 
         {/* BAND */}
         <figure className="cl-band">
-          <img src={c.aboutImage ?? `https://picsum.photos/seed/${c.businessName}-band/1600/620`} alt={`Estrutura de ${c.businessName}`} loading="lazy" />
+          <img src={fotoOu(p, 1600, 620, c.aboutImage, c.heroImage)} alt={`${c.businessName} em ${c.city}`} loading="lazy" />
           <div className="cl-wrap"><figcaption>{c.businessName} · {c.city}, {c.state}</figcaption></div>
         </figure>
 
         {/* ABOUT */}
         <section className="cl-block cl-about" id="sobre-nos">
           <div className="cl-wrap cl-about-inner">
-            <img src={c.aboutImage ?? `https://picsum.photos/seed/${c.businessName}-about/760/570`} alt={`Equipe de ${c.businessName}`} loading="lazy" />
+            <img src={fotoOu(p, 760, 570, c.aboutImage, c.heroImage)} alt={`Sobre ${c.businessName}`} loading="lazy" />
             <div>
               <div className="cl-eyebrow">Sobre nós</div>
               <h2 className="cl-serif">Conheça {c.businessName}</h2>
               <p>{c.about}</p>
               <div className="cl-checks">
-                <div><span className="cl-check-icon"><Icon name="check" size={16} /></span> {c.yearsExperience} anos de experiência em {c.city}</div>
-                <div><span className="cl-check-icon"><Icon name="check" size={16} /></span> {c.credential}</div>
+                {c.yearsExperience > 0 && <div><span className="cl-check-icon"><Icon name="check" size={16} /></span> {c.yearsExperience} anos de experiência em {c.city}</div>}
+                {c.credential && <div><span className="cl-check-icon"><Icon name="check" size={16} /></span> {c.credential}</div>}
                 {c.stats?.slice(0, 2).map((s, i) => (
                   <div key={i}><span className="cl-check-icon"><Icon name="check" size={16} /></span> {s.value} {s.label}</div>
                 ))}
@@ -416,9 +408,9 @@ export default function CleanLayout({ c, p, preview }: { c: SiteContent; p: Pale
         {/* CTA */}
         <section className="cl-wrap" id="contato">
           <div className="cl-cta">
-            <div className="cl-eyebrow">Agendamento</div>
-            <h2 className="cl-serif">Sua consulta está a uma mensagem de distância</h2>
-            <p>Entre em contato pelo WhatsApp e receba os horários disponíveis em minutos.</p>
+            <div className="cl-eyebrow">Contato</div>
+            <h2 className="cl-serif">Fale com {c.businessName}</h2>
+            <p>Mande sua mensagem pelo WhatsApp e tire suas dúvidas direto com a gente.</p>
             <a href={whatsapp} className="cl-btn">{c.ctaLabel}</a>
           </div>
         </section>
@@ -439,10 +431,12 @@ export default function CleanLayout({ c, p, preview }: { c: SiteContent; p: Pale
                 <a key={i} href="#especialidades">{s.name}</a>
               ))}
             </div>
-            <div>
-              <h4>Responsável</h4>
-              <p>{c.credential}</p>
-            </div>
+            {c.credential && (
+              <div>
+                <h4>Responsável</h4>
+                <p>{c.credential}</p>
+              </div>
+            )}
           </div>
           <div className="cl-foot-bottom">
             <span>© {new Date().getFullYear()} {c.businessName}</span>
