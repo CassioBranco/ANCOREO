@@ -62,3 +62,6 @@ docs/_backups/
 
 # backups automáticos de config (o original é que é versionado)
 *.graphify-bak
+
+# credenciais de teste geradas por scripts/seed-usuario-teste.mjs
+*.local.md
