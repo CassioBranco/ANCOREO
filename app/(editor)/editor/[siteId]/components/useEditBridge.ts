@@ -27,6 +27,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { createBrowserClient } from '@/lib/supabase/client'
 import {
   EVT_INLINE_CONTENT,
+  EVT_PANEL_DRAFT,
   EVT_PANEL_SAVED,
   IMAGE_SECTION_TYPES,
   SECTION_TYPE_LABELS,
@@ -504,8 +505,21 @@ export function useEditBridge(
         window.location.origin,
       )
     }
+    // rascunho (ainda digitando): só espelha no preview, não mexe nas linhas do banco
+    const onPanelDraft = (e: Event) => {
+      const d = (e as CustomEvent).detail as { sectionType?: string; content?: SectionContent } | null
+      if (!d?.sectionType || !d.content) return
+      iframeRef.current?.contentWindow?.postMessage(
+        { source: 'ancoreo-editor', type: 'apply-content', sectionType: d.sectionType, content: d.content },
+        window.location.origin,
+      )
+    }
     window.addEventListener(EVT_PANEL_SAVED, onPanelSaved)
-    return () => window.removeEventListener(EVT_PANEL_SAVED, onPanelSaved)
+    window.addEventListener(EVT_PANEL_DRAFT, onPanelDraft)
+    return () => {
+      window.removeEventListener(EVT_PANEL_SAVED, onPanelSaved)
+      window.removeEventListener(EVT_PANEL_DRAFT, onPanelDraft)
+    }
   }, [])
 
   const runUndo = useCallback(() => {

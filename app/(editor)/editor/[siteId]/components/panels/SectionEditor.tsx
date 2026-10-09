@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { createBrowserClient } from '@/lib/supabase/client'
-import { EVT_INLINE_CONTENT, EVT_PANEL_SAVED } from '@/lib/editor/inline-edit'
+import { EVT_INLINE_CONTENT, EVT_PANEL_DRAFT, EVT_PANEL_SAVED } from '@/lib/editor/inline-edit'
 
 type Props = {
   siteId: string
@@ -60,9 +60,12 @@ export default function SectionEditor({
   // aceitamos conteúdo novo do pai quando ele REALMENTE muda de objeto — o
   // caso do "Preencher tudo com IA", que reescreve tudo por fora.
   const ultimoDoPai = useRef(initialContent)
+  // Mudança que veio de fora (pai ou edição inline) não volta pro preview como rascunho.
+  const veioDeFora = useRef(true)
   useEffect(() => {
     if (initialContent === ultimoDoPai.current) return
     ultimoDoPai.current = initialContent
+    veioDeFora.current = true
     setContent(initialContent ? unwrapMalformed(sectionType, initialContent) : null)
   }, [initialContent, sectionType])
 
@@ -70,11 +73,24 @@ export default function SectionEditor({
   useEffect(() => {
     const onInline = (e: Event) => {
       const d = (e as CustomEvent).detail as { sectionType?: string; content?: SectionContent } | null
-      if (d?.sectionType === sectionType && d.content) setContent(unwrapMalformed(sectionType, d.content))
+      if (d?.sectionType === sectionType && d.content) {
+        veioDeFora.current = true
+        setContent(unwrapMalformed(sectionType, d.content))
+      }
     }
     window.addEventListener(EVT_INLINE_CONTENT, onInline)
     return () => window.removeEventListener(EVT_INLINE_CONTENT, onInline)
   }, [sectionType])
+
+  // Digitando na aba Textos → o preview acompanha na hora; o banco só grava no blur.
+  useEffect(() => {
+    if (veioDeFora.current) { veioDeFora.current = false; return }
+    if (!content) return
+    const t = setTimeout(() => {
+      window.dispatchEvent(new CustomEvent(EVT_PANEL_DRAFT, { detail: { sectionType, content } }))
+    }, 120)
+    return () => clearTimeout(t)
+  }, [content, sectionType])
 
   // locked: true quando o dono escreveu à mão, false quando aceitou um texto
   // da IA. Bloco travado é pulado pelo "Preencher tudo com IA" (ai-sections.ts).

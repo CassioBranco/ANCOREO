@@ -16,6 +16,7 @@ import {
   buildCustom,
 } from '@/app/templates/model-data'
 import { FONT_PAIRS } from '@/lib/templates/fonts'
+import { getPalette } from '@/lib/templates/palettes'
 import { SECTIONS, type SectionContent, type SectionMap } from '../useHomeSections'
 import { readSiteGeneration } from '@/lib/editor/generation-stream'
 import type { EditorPanel } from '../EditorSidebar'
@@ -387,12 +388,12 @@ export default function CustomizationPanel({
                 className={`ed-pal-row ed-opt ${selectedName === 'Original' ? 'on' : ''}`}
               >
                 <span className="sw">
-                  {['#3a4a63', '#26344a', '#5d6b82'].map((c, i) => (
+                  {(() => { const p = getPalette(site.niche ?? 'servicos', site.palette_index ?? 0); return [p.primary, p.secondary, p.accent] })().map((c, i) => (
                     <i key={i} style={{ background: c, flex: i === 0 ? 2 : 1 }} />
                   ))}
                 </span>
                 <b>Original</b>
-                <span style={{ marginLeft: 'auto', fontSize: '.72rem', color: 'var(--muted)' }}>padrão do template</span>
+                <span style={{ marginLeft: 'auto', fontSize: '.72rem', color: 'var(--muted)' }}>cores do seu ramo</span>
               </button>
 
               {PALETTE_GROUPS.map(group => {

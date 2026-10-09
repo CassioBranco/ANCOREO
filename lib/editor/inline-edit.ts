@@ -82,6 +82,8 @@ export type EditorToPreviewMsg =
 export const EVT_INLINE_CONTENT = 'anc:inline-content'
 /** SectionEditor → hook do editor: painel salvou; espelhar no preview sem reload */
 export const EVT_PANEL_SAVED = 'anc:panel-saved'
+/** SectionEditor → hook do editor: o dono está digitando; espelhar no preview antes de salvar */
+export const EVT_PANEL_DRAFT = 'anc:panel-draft'
 
 // ── Atributos usados pra marcar o DOM do preview ────────────
 export const SECTION_ATTR = 'data-anc-section'
